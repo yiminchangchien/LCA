@@ -37,9 +37,7 @@ plot(pressure)
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
-
-## Data Preparation
-
+## library calls
 ```{r}
 library(rgdal)
 library(rgeos)
@@ -52,10 +50,27 @@ library(dplyr)
 library(spdep)
 library(GISTools)
 library(tmap)
+```
+
+
+## Data Preparation
+
+```{r}
 ##### 1. Data pre-processing for voxel viewshed analysis  
 setwd("/Users/Yi-Min/R session/Lake District/")
 dem <- readGDAL("DEM_25m")
 class(dem)
 plot(dem)
+```
+
+## LCM2015 
+
+```{r}
+# 2.2 pre-processing LCM2015 25m land cover for voxel viewshed analysis 
+setwd("/Users/Yi-Min/R session/Lake District/CEH LCM2015/")
+"lcm-LakeDist-25m" %>% readGDAL() -> lcm
+class(lcm)
+dim(dem) == dim(lcm)
+plot(lcm)
 ```
 
