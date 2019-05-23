@@ -1,0 +1,61 @@
+---
+title: "Spatial Autocorrelation"
+author: "Yi-Min Chang Chien"
+date: "22/05/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## F-test
+
+In general, an F-test in regression compares the fits of different linear models. Unlike t-tests that can assess only one regression coefficient at a time, the F-test can assess multiple coefficients simultaneously.
+
+The F-test of the overall significance is a specific form of the F-test. It compares a model with no predictors to the model that you specify. A regression model that contains no predictors is also known as an intercept-only model.
+
+The hypotheses for the F-test of the overall significance are as follows:
+
+Null hypothesis: The fit of the intercept-only model and your model are equal.
+Alternative hypothesis: The fit of the intercept-only model is significantly reduced compared to your model.
+
+If the P value for the F-test of overall significance test is less than your significance level, you can reject the null-hypothesis and conclude that your model provides a better fit than the intercept-only model.
+
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+## Data Preparation
+
+```{r}
+library(rgdal)
+library(rgeos)
+library(tidyverse)
+library(raster)
+library(sf)
+library(sp)
+library(raster)
+library(dplyr)
+library(spdep)
+library(GISTools)
+library(tmap)
+##### 1. Data pre-processing for voxel viewshed analysis  
+setwd("/Users/Yi-Min/R session/Lake District/")
+dem <- readGDAL("DEM_25m")
+class(dem)
+plot(dem)
+```
+
