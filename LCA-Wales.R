@@ -72,7 +72,7 @@ plot(LCA.sp$SQ, LCA.sp$Sce)
 
 #Build ordinal logistic regression model
 require(MASS)
-model = polr(SQ ~ Sce , data = LCA.sp@data, Hess = TRUE)
+model = polr(SQ ~ Sce + Abs + Nat, data = LCA.sp@data, Hess = TRUE)
 summary(model)
 
 # Performing the significance test of coefficients and intercepts
@@ -81,9 +81,98 @@ pval <- pnorm(abs(summary_table[, "t value"]), lower.tail = FALSE)* 2
 summary_table <- cbind(summary_table, "p value" = round(pval, 3))
 summary_table
 
+# interpreting the results
+# Apply inverse logit to transform to probabilities
+#  (See Equation in the margin)
+     prob.Sce <- 1 / (1 + exp(-0.8276))
+     prob.Low <- 1 / (1 + exp(-1.4328))
+prob.Moderate <- 1 / (1 + exp(-3.7215))
+    prob.High <- 1 / (1 + exp(-6.1166))
+
+#Compute confusion table and misclassification error
+predictSQ = predict(model,LCA.sp@data)
+tab1 <- table(LCA.sp$SQ, predictSQ)
+summary(as.character(LCA.sp$SQ) != as.character(predictSQ))    
+790/(790+921)
+921/(790+921)
+
+#Plotting the effects 
+library("effects")
+plot(Effect(focal.predictors = "Sce", model))
+plot(Effect(focal.predictors = "Abs", model))
+plot(Effect(focal.predictors = "Nat", model))
+plot(Effect(focal.predictors = c("Sce", "Abs", "Nat"),model))
 # # Fortunately, we can bypass the above mathematical calculation by using the predict function in R
 # new_data <- data.frame("religion"= "yes","degree"="no","country"="Norway","age"=30,"gender"="male")
 # round(predict(model_fit,new_data,type = "p"), 3)
+
+##### 3.3. Geographically Weighted Ordinal Regression (GWOR)
+## Functions for implementing GWOR
+source("/Users/Yi-Min/Rsession/LANDMAP/supporting materials/orderedfit.R")
+source("/Users/Yi-Min/Rsession/LANDMAP/supporting materials/bw.gwordered.R")
+source("/Users/Yi-Min/Rsession/LANDMAP/supporting materials/gwr.ordered.R")
+source("/Users/Yi-Min/Rsession/LANDMAP/supporting materials/MonteCarlo.R")
+
+require(dplyr)
+
+tmp -> LCA.sp
+
+LCA.sp %>%
+  st_as_sf() %>%
+  dplyr::select(UID, SQ, Sce, Nat) %>%
+  as("Spatial") %>%
+  spatialEco::sp.na.omit(margin = 1) ->
+  LCA.sp
+
+summary(LCA.sp)  
+
+###### find the centroids of the Aspect Area 
+setwd("/Users/Yi-Min/Rsession/LANDMAP/Data/LandmapVisualSensory/")
+sq <- 
+  "NRW_LandMap_Visual_SensoryPolygon.shp" %>% 
+  st_read() %>%
+  st_centroid() %>%
+  dplyr::select(UID) %>%
+  left_join(., as.data.frame(LCA.sp)) %>%
+  as("Spatial") %>%
+  spatialEco::sp.na.omit(margin = 1)
+
+
+library(maxLik)
+library(MASS)
+library(maptools)
+library(geoR)
+library(sp)
+library(rgdal)
+library(gstat)
+library(GWmodel)
+# filter(SQ %in% c("Low", "Moderate","High","Outstanding")) %>%
+dMat <- gw.dist(dp.locat=coordinates(LCA.sp), focus=0, p=2, theta=0)
+#dMat <- spDists(LCA.sp@coords)
+#### Bandwidth selection
+formula <- SQ ~ Sce + Nat
+
+bw.fixed.probit <- bw.gwordered(formula, data=LCA.sp, kernel="bisquare", adaptive=FALSE, link="probit", dMat=dMat, fixed.vars=NULL)
+
+gwor.fixed.probit <- gwr.ordered(formula, data=LCA.sp, kernel="bisquare", adaptive=FALSE, bw=bw.fixed.probit, link="probit", dMat=dMat, fixed.vars=NULL)
+
+# test the spatial non-stationary in local coefficients using Monte Carlo approach
+test.fixed.probit <- Monte.Carlo(formula, LCA.sp, kernel="bisquare", adaptive=FALSE, bw=bw.fixed.probit, link="probit", dMat=dMat, fixed.vars=NULL, nsim=99)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 require(car)
 vif(model)
@@ -118,4 +207,6 @@ grd_5k$Nat <- raster::extract(Nat, grd_5k, fun = median, na.rm = TRUE) %>% as.ve
 grd_5k$Rem <- raster::extract(Rem, grd_5k, fun = median, na.rm = TRUE) %>% as.vector()
 grd_5k$Rug <- raster::extract(Rug, grd_5k, fun = median, na.rm = TRUE) %>% as.vector()
 
+setwd("/Users/Yi-Min/Rsession/LANDMAP/LCA-Wales")
+save(list = c("grd_2.5k", "grd_5k", "LCA.sp", "sq", "LCA"), file = "20200107.RData")
 
