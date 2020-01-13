@@ -68,23 +68,54 @@ LCA.sp$Rug <- raster::extract(Rug, LCA.sp, fun = median, na.rm = TRUE) %>% as.ve
 #Ordering the dependent variable
 LCA.sp$SQ = factor(LCA.sp$SQ, levels = c("Low", "Moderate", "High", "Outstanding"), ordered = TRUE)
 
+####### 2. Exploratory analysis
+##### 2.1. boxplot LANDMAP Scenic Quality and Scenic-Or-Not ratings
 plot(LCA.sp$SQ, LCA.sp$Sce)
+require(ggplot2)
+ggplot(LCA.sp@data, aes(x = SQ, y = Sce)) +
+  geom_boxplot(size = .75) +
+  geom_jitter(alpha = .5) +
+  #facet_grid(pared ~ public, margins = TRUE) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 1))
 
 #Build ordinal logistic regression model
 require(MASS)
-model = polr(SQ ~ Sce + Abs + Nat, data = LCA.sp@data, Hess = TRUE)
+model = polr(SQ ~ Sce, data = LCA.sp@data, Hess = TRUE)
 summary(model)
 
-# Performing the significance test of coefficients and intercepts
+# Performing the significance test of coefficients (p-value for the coefficient estimates)
 summary_table <- coef(summary(model))
 pval <- pnorm(abs(summary_table[, "t value"]), lower.tail = FALSE)* 2
 summary_table <- cbind(summary_table, "p value" = round(pval, 3))
-summary_table
+tab <- summary_table
+
+# Confidence Intervals:
+# We can also get confidence intervals for the parameter estimates. 
+# These can be obtained either by profiling the likelihood function or 
+# by using the standard errors and assuming a normal distribution. 
+# Note that profiled CIs are not symmetric (although they are usually close to symmetric). 
+# If the 95% CI does not cross 0, the parameter estimate is statistically significant.
+
+ci <- confint(model) # default method gives profiled CIs
+confint.default(model)
+# The coefficients from the model can be somewhat difficult to interpret 
+# because they are scaled in terms of logs. 
+# Another way to interpret logistic regression models is to convert the coefficients into odds ratios. 
+# To get the OR and confidence intervals, we just exponentiate the estimates and confidence intervalse
+
+#exp(cbind(OR = coef(model), ci))
+cbind(OR = coef(model), t(as.matrix(ci))) %>% exp()
+
+# Hmisc library
+predict(model, data.frame(Sce = 7), type = "response")
 
 # interpreting the results
 # Apply inverse logit to transform to probabilities
 #  (See Equation in the margin)
-     prob.Sce <- 1 / (1 + exp(-0.8276))
+# exponentiate log odds (logit) to odds scale
+exp(coef(model))
+exp(model$zeta)
+     prob.Sce <- 1 / (1 + exp(2.13))
      prob.Low <- 1 / (1 + exp(-1.4328))
 prob.Moderate <- 1 / (1 + exp(-3.7215))
     prob.High <- 1 / (1 + exp(-6.1166))
@@ -105,6 +136,10 @@ plot(Effect(focal.predictors = c("Sce", "Abs", "Nat"),model))
 # # Fortunately, we can bypass the above mathematical calculation by using the predict function in R
 # new_data <- data.frame("religion"= "yes","degree"="no","country"="Norway","age"=30,"gender"="male")
 # round(predict(model_fit,new_data,type = "p"), 3)
+
+
+
+
 
 ##### 3.3. Geographically Weighted Ordinal Regression (GWOR)
 ## Functions for implementing GWOR
@@ -150,13 +185,17 @@ library(GWmodel)
 dMat <- gw.dist(dp.locat=coordinates(LCA.sp), focus=0, p=2, theta=0)
 #dMat <- spDists(LCA.sp@coords)
 #### Bandwidth selection
-formula <- SQ ~ Sce + Nat
+formula <- SQ ~ Sce
+
+bw.fixed.logit <- bw.gwordered(formula, data=LCA.sp, kernel="bisquare", adaptive=FALSE, link="logit", dMat=dMat, fixed.vars=NULL)
+#gwor.fixed.logit 
+gwor.fixed.logit.int <- gwr.ordered(formula, data=LCA.sp, kernel="bisquare", adaptive=FALSE, bw=bw.fixed.logit.int, link="logit", dMat=dMat, fixed.vars=NULL)
 
 bw.fixed.probit <- bw.gwordered(formula, data=LCA.sp, kernel="bisquare", adaptive=FALSE, link="probit", dMat=dMat, fixed.vars=NULL)
-
-gwor.fixed.probit <- gwr.ordered(formula, data=LCA.sp, kernel="bisquare", adaptive=FALSE, bw=bw.fixed.probit, link="probit", dMat=dMat, fixed.vars=NULL)
+gwor.fixed.probit <- gwr.ordered(formula, data=LCA.sp, kernel="bisquare", adaptive=FALSE, bw=bw.fixed.logit, link="probit", dMat=dMat, fixed.vars=NULL)
 
 # test the spatial non-stationary in local coefficients using Monte Carlo approach
+ test.fixed.logit <- Monte.Carlo(formula, LCA.sp, kernel="bisquare", adaptive=FALSE, bw=bw.fixed.logit, link="logit", dMat=dMat, fixed.vars=NULL, nsim=99)
 test.fixed.probit <- Monte.Carlo(formula, LCA.sp, kernel="bisquare", adaptive=FALSE, bw=bw.fixed.probit, link="probit", dMat=dMat, fixed.vars=NULL, nsim=99)
 
 
