@@ -57,10 +57,11 @@ manager of your TeX installation, which is typically TeX Live or MikTeX.
 ```{r}
 library(dplyr)
 library(raster)
-library(sf)
-library(sp)
 library(readr)
 library(rgeos)
+library(sf)
+library(sp)
+library(tidyverse)
 
 ##### 1. collect data
 ###### 1.1. download the visual and sensory aspect polygons for Wales
@@ -73,6 +74,11 @@ unzip(zipfile = temp, exdir = temp2)
   st_read(stringsAsFactors = FALSE) ->
   LCA
 rm(list = c("temp", "temp2"))
+
+LCA.sp <- 
+  LCA %>%
+  dplyr::select("UID",SQ = "VS_46") %>%
+  as("Spatial")
 
 ###### 1.2. download Scenic-Or-Not dataset
 bng <- "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 
@@ -93,35 +99,38 @@ sc <-
   st_transform(crs=27700) %>%
   as("Spatial")
 
-# #### combining Geograph metadata
-# Geograph <- function(url, pts) {
-#   pts <-
-#     url %>% 
-#     url() %>%
-#     gzcon() %>%
-#     readLines() %>%
-#     textConnection() %>%
-#     read.csv(sep = "\t") %>%
-#     as.data.frame() %>%
-#     left_join(pts, ., by = "gridimage_id")
-#   return(pts)
-# }
-# sc <- 
-#   read_tsv("http://scenicornot.datasciencelab.co.uk/votes.tsv",
-#            col_types = cols("ID" = col_number(),
-#                             "Lat" = col_double(),
-#                             "Lon" = col_double(),
-#                             "Average" = col_double(),
-#                             "Variance" = col_double(),
-#                             "Votes" = col_character(),
-#                             "Geograph URI" = col_character())) %>%
-#   as.data.frame %>%
-#   # st_as_sf(coords=c("Lon","Lat"), crs=4326) %>%
-#   # st_transform(crs=27700) %>%
-#   mutate(gridimage_id = as.integer(gsub("http://www.geograph.org.uk/photo/", "", `Geograph URI`))) %>%
-#   Geograph("http://data.geograph.org.uk/dumps/gridimage_geo.tsv.gz", .) ->
-#   test
-#   as("Spatial")
+#### combining Geograph metadata
+Geograph <- function(url, pts) {
+  pts <-
+    url %>%
+    url() %>%
+    gzcon() %>%
+    readLines() %>%
+    textConnection() %>%
+    read.csv(sep = "\t") %>%
+    as.data.frame() %>%
+    left_join(pts, ., by = "gridimage_id")
+  return(pts)
+}
+sc <-
+  read_tsv("http://scenicornot.datasciencelab.co.uk/votes.tsv",
+           col_types = cols("ID" = col_number(),
+                            "Lat" = col_double(),
+                            "Lon" = col_double(),
+                            "Average" = col_double(),
+                            "Variance" = col_double(),
+                            "Votes" = col_character(),
+                            "Geograph URI" = col_character())) %>%
+  as.data.frame %>%
+  # st_as_sf(coords=c("Lon","Lat"), crs=4326) %>%
+  # st_transform(crs=27700) %>%
+  mutate(gridimage_id = as.integer(gsub("http://www.geograph.org.uk/photo/", "", `Geograph URI`))) %>%
+  Geograph("http://data.geograph.org.uk/dumps/gridimage_geo.tsv.gz", .) ->
+  sc_tab %>%
+  drop_na(viewpoint_eastings, viewpoint_northings) %>%
+  st_as_sf(coords=c("viewpoint_eastings","viewpoint_northings"), crs=27700) %>%
+  as("Spatial") -> 
+  sc_new
 
 
 ###### 1.3. load in the wildness components
@@ -138,16 +147,29 @@ Wales.sp <-
   raster::getData("GADM", country = "United Kingdom", level = 1) %>%
   subset(NAME_1 == "Wales") %>%
   spTransform(crs(Abs))
-
 Abs[mask(is.na(Abs), rgeos::gBuffer(Wales.sp, byid=T, width=-100))] <- 19.125
+
+crs(LCA.sp)
+crs(sc)
+crs(sc_new)
+crs(Abs)
+crs(Nat)
+crs(Rem)
+crs(Rug)
+
+LCA.sp <- LCA.sp %>% spTransform(crs(Abs))
+    sc <- sc %>% spTransform(crs(Abs))
+sc_new <- sc_new %>% spTransform(crs(Abs))
+
 LCA.sp$Sce <- over(LCA.sp, sc[,'Average'], fn = median) %>% as.vector() %>% unlist()
+LCA.sp$SC  <- over(LCA.sp, sc_new[,'Average'], fn = median) %>% as.vector() %>% unlist()
 LCA.sp$Abs <- raster::extract(Abs, LCA.sp, fun = median, na.rm = TRUE) %>% as.vector()
 LCA.sp$Nat <- raster::extract(Nat, LCA.sp, fun = median, na.rm = TRUE) %>% as.vector()
 LCA.sp$Rem <- raster::extract(Rem, LCA.sp, fun = median, na.rm = TRUE) %>% as.vector()
 LCA.sp$Rug <- raster::extract(Rug, LCA.sp, fun = median, na.rm = TRUE) %>% as.vector()
 ```
 ## Analysis
-#### Oridnal regression model
+#### Oridnal Regression Model
 
 ```{r}
 ####### 3. Build a global ordinal logistic regression model
@@ -156,61 +178,362 @@ require(MASS)
 model = polr(SQ ~ Sce, data = LCATrain, Hess = TRUE)
 summary(model)
 
-#### 3.2.1. Mapping the residual
-LCA.sp$fitted <- 
-  colnames(model$fitted.values)[max.col(model$fitted.values, ties.method="first")] %>%
-  factor(., levels = c("Low", "Moderate", "High", "Outstanding"), ordered = TRUE)
-```
-#### 4. Building a Gradient Boosting Machine
-
-```{r}
-library(caret)
-##### 4.1. Split data into training and validation dataset
-set.seed(2046)
-trainIndex <- createDataPartition(LCA.sp$SQ, p = .7, 
-                                  list = FALSE, 
-                                  times = 1)
-head(trainIndex)
-LCATrain <- LCA.sf[ trainIndex,]
-LCATest  <- LCA.sf[-trainIndex,]
-
-##### 4.2. Build a Gradient Boosting Machine
-library(gbm)
-LCATrain$SQ = factor(LCATrain$SQ, levels = c("Low", "Moderate", "High", "Outstanding"), ordered = FALSE)
-LCA_gbm <- gbm(SQ ~ Sce + Abs + Nat, # + Rem + Rug,
-               data = st_drop_geometry(LCATrain),
-               distribution = "multinomial",
-               #cv.folds = 4,
-               shrinkage = .01,
-               n.minobsinnode = 10,
-               n.trees = 1000) 
-summary(LCA_gbm)
-print(LCA_gbm)
+# #### 3.2.1. Mapping the residual
+# LCA.sp$fitted <- 
+#   colnames(model$fitted.values)[max.col(model$fitted.values, ties.method="first")] %>%
+#   factor(., levels = c("Low", "Moderate", "High", "Outstanding"), ordered = TRUE)
 
 ###### 4.3. validate the model
-pred = predict.gbm(object = LCA_gbm,
+pred = predict(object = model,
                    newdata = LCATest,
-                   n.trees = 1000,
+                   n.trees = 2000,
                    type = "response")
 labels = colnames(pred)[apply(pred, 1, which.max)]
 LCATest <- cbind(LCATest, fitted = labels)
+head(LCATest)
 
-setwd("/Users/Yi-Min/Rsession/ScenicOrNot/scenicness/Results/Figures")
-png(filename = "test.png", w = 10, h = 10, units = "in", res = 300)
-par(mar=c(0,0,0,0)) 
-spplot(LCATest[,'fitted'], col = NA)
-dev.off()
+# setwd("/Users/Yi-Min/Rsession/ScenicOrNot/scenicness/Results/Figures")
+# png(filename = "test.png", w = 10, h = 10, units = "in", res = 300)
+# par(mar=c(0,0,0,0)) 
+# plot(LCATest[,'fitted'], col = NA)
+# dev.off()
 
 result = data.frame(LCATest$SQ, labels)
 print(result)
 
 # confusion matrix
-cm = confusionMatrix(LCATest$SQ, as.factor(labels))
+cm = confusionMatrix(as.factor(LCATest$SQ), as.factor(labels))
 print(cm)
+
+
+
+```
+#### 4. Building a Gradient Boosting Machine
+### hyper-parameters tuning 
+# shrinkage: learning rate determine how quickly the algorithm adapts, which is usually a small positive value between 0 and 1, where decreases lead to slower fitting, thus requiring the user to increase K
+# n.minobsinnode: η the fraction of data that is used at each iterative step / the minimum number of training set samples in a node to commence splitting
+# n.trees: number of trees/number of iterations: generally adding more trees to the model can be very slow to overfit. The advice is to keep adding trees until no further improvement is observed.
+
+
+
+
+```{r}
+library(caret)
+##### 4.1. Split data into training and validation dataset
+set.seed(2046)
+trainIndex <- 
+  LCA.sp[-c(which(LCA.sp$SQ=="Unassessed"), which(is.na(LCA.sp$SQ))),] %>%
+  as.data.frame() %>%
+  .$SQ %>%
+  createDataPartition(p = .8, 
+                      list = FALSE, 
+                      times = 1)
+head(trainIndex)
+LCATrain <- 
+  LCA.sp[-c(which(LCA.sp$SQ=="Unassessed"), which(is.na(LCA.sp$SQ))),] %>%
+  st_as_sf() %>%
+  .[ trainIndex,]
+
+LCATest  <- 
+  LCA.sp[-c(which(LCA.sp$SQ=="Unassessed"), which(is.na(LCA.sp$SQ))),] %>% 
+  st_as_sf() %>% 
+  .[-trainIndex,]
+
+LCATrain$SQ = factor(LCATrain$SQ, levels = c("Low", "Moderate", "High", "Outstanding"), ordered = FALSE)
+LCATest$SQ = factor(LCATest$SQ, levels = c("Low", "Moderate", "High", "Outstanding"), ordered = FALSE)
+
+x_train <- LCATrain %>% 
+  dplyr::select(SC, Abs, Nat, Rug) %>% #
+  st_drop_geometry() %>% 
+  as.matrix() %>% 
+  xgb.DMatrix()
+y_train <- LCATrain$SQ %>% 
+  as.integer() %>% 
+  -1 %>%
+  as.factor()
+
+x_test <- LCATest %>% 
+  dplyr::select(SC, Abs, Nat, Rug) %>%
+  st_drop_geometry() %>% 
+  as.matrix() %>% 
+  xgb.DMatrix()
+y_test = LCATest$SQ %>% 
+  as.integer() %>% 
+  -1
+
+ train.data <- LCATrain[, predictors] %>% st_drop_geometry() %>% as.matrix()
+train.label <- LCATrain$SQ %>% as.integer() %>% -1
+  test.data <- LCATest[, predictors] %>% st_drop_geometry() %>% as.matrix()
+ test.label <- LCATest$SQ %>% as.integer() %>% -1
+
+# Transform the two data sets into xgb.Matrix
+xgb.train = xgb.DMatrix(data=train.data, label = train.label)
+xgb.test = xgb.DMatrix(data=test.data, label = test.label)
+
+```
+#3. GBM hyper-parameters tuning
+
+Reference
+https://www.sciencedirect.com/science/article/pii/S0378778817320844
+# From Kaggle
+```{r}
+nrounds = 1000
+tune_grid <- expand.grid(
+  nrounds = seq(from = 100, to = nrounds, by = 100),
+  eta = 0.005,
+  max_depth = 5,
+  colsample_bytree = 1, # percent of columns to sample from for each tree
+  min_child_weight = 1, # minimum node size
+  subsample = 0.5,      # percent of training data to sample for each tree
+  #gamma = 0
+  gamma = 1
+  # lambda = c(0, 1e-2, 0.1, 1, 100, 1000, 10000),
+  # alpha = c(0, 1e-2, 0.1, 1, 100, 1000, 10000)
+)
+
+tune_control <- caret::trainControl(
+  method = "cv", # cross-validation
+  #method = "repeatedcv",
+  #repeats = 2,
+  number = 35, # with n folds 
+  #index = createFolds(tr_treated$Id_clean), # fix the folds
+  verboseIter = FALSE, # no training log
+  allowParallel = FALSE, # FALSE for reproducible results
+  returnData = FALSE,
+  #classProbs = TRUE,
+  #summaryFunction = multiClassSummary
+)
+
+set.seed(2046) 
+train_time <- system.time({
+  xgb_tune <- caret::train(
+    x = x_train,
+    y = y_train,
+    trControl = tune_control,
+    tuneGrid = tune_grid,
+    metric = "Accuracy",
+    method = "xgbTree",
+    # selectionFunction = "best", "oneSE","tolerance",
+    # objective = "multi:softprob",
+    # eval_metric = "mlogloss",
+    num_class = 4)
+  })
+xgb_tune$bestTune
+max(xgb_tune$results$Accuracy)
+
+# helper function for the plots
+tuneplot <- function(x) {
+  ggplot(x) +
+    coord_cartesian(ylim = c(max(x$results$Accuracy), min(x$results$Accuracy))) +
+    theme_bw()
+}
+
+tuneplot(xgb_tune)
+
+# Reference
+# https://github.com/topepo/caret/issues/389
 ```
 
 ```{r}
-# predicut the scenic quality based on the predictive model of all the covariates
+# Model evaluation
+predicted = predict(xgb_tune, x_test)
+# Predict outcomes with the test data
+xgb.pred <-
+  predict(xgb_tune, test.data, reshape=T) %>%
+  plyr::mapvalues(from = c(0,1,2,3), to = c("Low", "Moderate", "High", "Outstanding")) %>%
+  data.frame(predict = .)
+
+label = levels(LCATest$SQ)[test.label+1]
+result = data.frame(actual = label, predict = xgb.pred)
+
+# confusion matrix
+cm = confusionMatrix(as.factor(result$actual), as.factor(result$predict))
+print(cm)
+
+# Reference
+# https://datascienceplus.com/extreme-gradient-boosting-with-r/
+
+OSGB.1km.Wales$pred <-
+  OSGB.1km.Wales %>%
+  st_as_sf() %>%
+  st_drop_geometry() %>%
+  dplyr::select(Sce, Abs, Nat, Rug) %>%
+  predict(xgb_tune, ., reshape=T) %>%
+  plyr::mapvalues(from = c(0,1,2,3), to = c("Low", "Moderate", "High", "Outstanding")) %>%
+  as.character()
+
+spplot(OSGB.1km.Wales, "pred", col = NA)
+
+```
+
+### Stochastic hyperparameters
+
+### XGBoost ### fit the model with the optimal hyperparameters
+
+```{r}
+library(xgboost)
+# library(recipes)
+# xgb_prep <- recipe(Sale_Price ~ ., data = ames_train) %>%
+#   step_integer(all_nominal()) %>%
+#   prep(training = ames_train, retain = TRUE) %>%
+#   juice()
+
+# Train the XGBoost classifer
+set.seed(2046)
+LCA_xgb <- xgb.train(
+  data = xgb.train,
+  objective = "multi:softprob",
+  eval_metric = "mlogloss",
+  nrounds = 3000,
+  nthreads = 8,
+  early_stopping_rounds = 5,
+  nfold = 10,
+  watchlist = list(val1 = xgb.train, val2 = xgb.test),
+  params = list(
+    booster = "gbtree",
+    eta = 0.001,
+    max_depth = 3,
+    min_child_weight = 3,
+    gamma = 3,
+    subsample = 0.9,
+    colsample_bytree = 1,
+    #objective="multi:softprob",
+    #eval_metric = "mlogloss",
+    num_class = 4),
+  verbose = 0
+)
+
+# Review the final model and results
+LCA_xgb
+
+# Predict outcomes with the test data
+xgb.pred = predict(LCA_xgb, test.data, reshape=T) %>% as.data.frame()
+#xgb.pred = as.data.frame(xgb.pred)
+colnames(xgb.pred) = levels(LCATrain$SQ)
+
+# Use the predicted label with the highest probability
+xgb.pred$prediction = apply(xgb.pred, 1, function(x) colnames(xgb.pred)[which.max(x)])
+xgb.pred$label = levels(LCATest$SQ)[test.label+1]
+
+# Calculate the final accuracy
+result = sum(xgb.pred$prediction == xgb.pred$label)/nrow(xgb.pred)
+print(paste("Final Accuracy =",sprintf("%1.2f%%", 100*result)))
+
+
+# from https://rstudio-pubs-static.s3.amazonaws.com/336778_d7d321fab8694292bc0531300c11b319.html
+LCA_xgb <- xgb.cv(data = xgb.train,
+                  nrounds = 3000,
+                  nfold = 10,
+                  verbose = FALSE,
+                  prediction = TRUE,
+                  params = list(
+                    objective = "multi:softprob",
+                    eval_metric = "mlogloss",
+                    num_class = 4)
+                  )
+
+xgb.pred <- 
+  data.frame(LCA_xgb$pred) %>%
+  mutate(max_prob = max.col(., ties.method = "last"), label = train.label + 1)
+head(xgb.pred)
+
+# confusion matrix
+confusionMatrix(factor(xgb.pred$label), 
+                factor(xgb.pred$max_prob),
+                mode = "everything")
+# Reference
+# https://rpubs.com/dalekube/XGBoost-Iris-Classification-Example-in-R
+```
+
+
+```{r}
+ 
+
+LCATest %>%
+  st_drop_geometry() %>%
+  na.omit() %>%
+  predict(LCA.xgb, .) ->
+  pred
+test <- st_drop_geometry(LCATest)[,c(2,4:6,8)]
+test <- as.matrix(test)
+pred = predict(LCA.xgb, test)
+data.matrix(X_test[,-1])
+result = data.frame(LCATest$SQ, pred)
+print(result)
+
+cm = confusionMatrix(LCATest$SQ, as.factor(pred))
+print(cm)
+
+```
+### Using gbm package
+```{r}
+LCATrain$SQ = factor(LCATrain$SQ, levels = c("Low", "Moderate", "High", "Outstanding", "Unassessed", "NA"), ordered = FALSE)
+set.seed(2046)
+LCA_gbm <- 
+  LCATrain %>%
+  st_drop_geometry() %>%
+  #drop_na() %>%
+  gbm(SQ ~ SC + Abs + Nat + Rug,# + Rem,
+      distribution = "multinomial",
+      data = .,
+      #weights = ,
+      #var.monotone = NULL,
+      n.trees = 2000,
+      interaction.depth = 3,
+      n.minobsinnode = 15,
+      shrinkage = .005,
+      #bag.fraction = 0.5, 
+      #train.fraction = 1, 
+      cv.folds = 30,
+      #keep.data = TRUE, 
+      #verbose = FALSE, 
+      #class.stratify.cv = NULL,
+      #n.cores = NULL
+      )
+
+#plot(LCA_gbm)
+# find index for number trees with minimum CV error
+best <- which.min(LCA_gbm$cv.error)
+
+# get MSE and compute RMSE
+sqrt(LCA_gbm$cv.error[best])
+
+gbm.perf(LCA_gbm, method = "cv")
+
+###### 4.3. validate the model
+pred = predict.gbm(object = LCA_gbm,
+                   newdata = LCATest,
+                   n.trees = 2000,
+                   type = "response")
+labels = colnames(pred)[apply(pred, 1, which.max)]
+LCATest <- cbind(LCATest, fitted = labels)
+head(LCATest)
+
+# setwd("/Users/Yi-Min/Rsession/ScenicOrNot/scenicness/Results/Figures")
+# png(filename = "test.png", w = 10, h = 10, units = "in", res = 300)
+# par(mar=c(0,0,0,0)) 
+# plot(LCATest[,'fitted'], col = NA)
+# dev.off()
+
+result = data.frame(LCATest$SQ, labels)
+print(result)
+
+# confusion matrix
+cm = confusionMatrix(as.factor(LCATest$SQ), as.factor(labels))
+print(cm)
+
+## Reference
+# https://bradleyboehmke.github.io/HOML/gbm.html
+# https://towardsdatascience.com/understanding-gradient-boosting-machines-9be756fe76ab
+# https://www.datatechnotes.com/2018/03/classification-with-gradient-boosting.html
+# confusion matrix terminology:https://www.dataschool.io/simple-guide-to-confusion-matrix-terminology/
+
+```
+
+##### predict scenicness for the Lake District
+
+```{r, eval=FALSE}
+# # predicut the scenic quality based on the predictive model of all the covariates
 pred = predict.gbm(object = LCA_gbm,
                    newdata = OSGB.1km,
                    n.trees = 1000,
@@ -219,37 +542,19 @@ labels = colnames(pred)[apply(pred, 1, which.max)]
 result = data.frame(LCATest$SQ, labels)
 print(result)
 
-
-## Reference
-# https://towardsdatascience.com/understanding-gradient-boosting-machines-9be756fe76ab
-# https://www.datatechnotes.com/2018/03/classification-with-gradient-boosting.html
-# confusion matrix terminology:https://www.dataschool.io/simple-guide-to-confusion-matrix-terminology/
-
-# Classification with caret train method
-tc = trainControl(method = "repeatedcv", number = 10)
-
-model = train(SQ ~ Sce + Abs + Nat, data=LCATrain, method="gbm", trControl=tc)
-
-pred = predict(model, LCATest)
-result = data.frame(LCATest$SQ, pred)
-print(result)
-
-cm = confusionMatrix(LCATest$SQ, as.factor(pred))
-print(cm)
-
-
-
 ```
 
-```{r}
-GB.sp <- 
+
+##### predict the Scotland and England 
+```{r, eval=FALSE}
+GB.sp <-
   raster::getData("GADM", country = "United Kingdom", level = 1) %>%
   subset(NAME_1 == c("England","Scotland","Wales")) %>%
   spTransform(crs(Abs))
 
 Abs[mask(is.na(Abs), rgeos::gBuffer(GB.sp, byid=T, width=-100))] <- 19.125
 
-# LCA.sp <- 
+# LCA.sp <-
 #   LCA %>%
 #   select("UID","VS_46") %>%
 #   as(., "Spatial")
@@ -277,27 +582,21 @@ exactly the same way as an article, unless you are submitting to a
 camera-ready copy (CRC) journal.
 
 #### Analysis
-```{r}
 
-```
-```{r}
-```
 apply the model to a case study area and suggest a character area by grouping adjacent pixels with the same class. I suppose this would have to be on a 1km grid for the Scenicness data
-```{r}
+```{r, eval=FALSE}
 st_read("/Users/Yi-Min/Rsession/ScenicOrNot/scenicness/Grid/OSGB_Grid/Shapefile/OSGB_Grid_1km.shp") %>%
   as("Spatial") %>%
   spTransform(crs(Abs)) ->
-  OSGB.1km 
+  OSGB.1km
 
-sc %>% spTransform(crs(Abs)) -> sc  
+sc %>% spTransform(crs(Abs)) -> sc
 
 OSGB.1km$Sce <- over(OSGB.1km, sc[,'Average'], fn = median) %>% as.vector() %>% unlist()
 OSGB.1km$Abs <- raster::extract(Abs, OSGB.1km, fun = median, na.rm = TRUE) %>% as.vector()
 OSGB.1km$Nat <- raster::extract(Nat, OSGB.1km, fun = median, na.rm = TRUE) %>% as.vector()
 OSGB.1km$Rem <- raster::extract(Rem, OSGB.1km, fun = median, na.rm = TRUE) %>% as.vector()
 OSGB.1km$Rug <- raster::extract(Rug, OSGB.1km, fun = median, na.rm = TRUE) %>% as.vector()
-
-
 ```
 
 -   document style
