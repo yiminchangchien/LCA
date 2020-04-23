@@ -1,20 +1,16 @@
 ---
-title: Short Paper
+title: An hybrid approach of identifying outstanding scenic beauty areas by machine learning andscape designation
 author:
-  - name: Alice Anonymous
-    email: alice@example.com
-    affiliation: Some Institute of Technology
+  - name: Yi-Min Chang Chien
+    email: gyymcc@leeds.ac.uk
+    affiliation: School of Geography, University of Leeds
     footnote: 1
-  - name: Bob Security
+  - name: Alexis Comber
     email: bob@example.com
-    affiliation: Another University
-  - name: Cat Memes
+    affiliation: School of Geography, University of Leeds
+  - name: Steve Carber
     email: cat@example.com
-    affiliation: Another University
-    footnote: 2
-  - name: Derek Zoolander
-    email: derek@example.com
-    affiliation: Some Institute of Technology
+    affiliation: School of Geography, University of Leeds
     footnote: 2
 address:
   - code: Some Institute of Technology
@@ -31,9 +27,10 @@ abstract: |
 
   It consists of two paragraphs.
 
-journal: "An awesome journal"
+journal: "Landscape and Urban Planning"
 date: "`r Sys.Date()`"
 bibliography: mybibfile.bib
+link-citations: yes
 #linenumbers: true
 #numbersections: true
 csl: elsevier-harvard.csl
@@ -46,14 +43,85 @@ _Text based on elsarticle sample manuscript, see [http://www.elsevier.com/author
 The Elsevier article class
 ==========================
 
-#### Installation
+#### Introduction
+Landscape designation --> designating criteria --> a few expert judgement --> to some extent, landscape designation is based on character --> Landscape Character Assessment (descriptive v.s. evaluative) --> evaluative consideration (i.e. how is the evaluative components under current character system?)
 
-If the document class *elsarticle* is not available on your computer,
-you can download and install the system package *texlive-publishers*
-(Linux) or install the LaTeX package *elsarticle* using the package
-manager of your TeX installation, which is typically TeX Live or MikTeX.
+- In order to make these judgements (some of which are subjective) in a transparent and consistent way, this Guidance sets out which criteria Natural England intends to use.
 
-#### Data Preparation
+- It is certain in the Guidance for AONB designation that judgement has to be made in order to value the landscape;
+
+- No information is provided on how to involve stakeholders and how to measure whether there is consensus about the value of the landscape or not;
+
+- The single use of experts in assessment methods is highly contested in landscape preference research;
+
+- The practicality of the existing framework is questionable.
+
+- Nevertheless, questions need to be raised here. First of all, who is describing value to the landscape? Is the designation based on public judgment, or on expert judgement? This is not being stressed in the document, only it states that: ‘where there is a consensus of opinion that an area meets the statutory criteria or should be designated, this helps determining whether it is accorded a special value that should be recognized. Views of stakeholders and the public can be strong indicators as to whether there is consensus about the value of a landscape’. Unfortunately, no information is provided on how to involve stakeholders and how to measure whether there is consensus about the value of the landscape or not.
+
+- Characterisation of landscape is a matter of interpretation and perception;
+
+- When it comes to planning, decisions have to be made, so ignoring its importance by not valuing historic landscapes seems impractical;
+
+- Landscape is perceived by people, but as perception is influenced by personal feelings and opinions, we cannot be objective.
+
+- the landscapes are classified on classified of low, moderate, high or outstanding quality.
+# qualitative to quantitative evaluation
+The current practice of LCA is based on qualitative descriptions. The evaluation is carried out by specialists and recorded in a qualitative manner where the evaluative components under current character system includes wildness/integrity/ The relationship between wildness and scenicness was evidence by our previous attempt (forthcoming). Thus, it might be worth to look at whether the qualitative measure of wildness quality can be enhanced the qualitative evaluation of scenic quality. the sources involved are not quantitative: they are texts containing qualitative descriptions and, as such, need to be analysed using a mix of approaches that
+combine spatial analysis with close reading.
+- Some of the criteria used to value the landscape are also used as landscape character indica-tors for perceptual aspects such as tranquillity and wildness.  However, it is not stated how to use these criteria in practice or what to do with these indicators in the first place. It is merely mentioned that they can be used to identify valued landscapes that merit some form of designa-tion or recognition.  Yet, in what way are the stakeholders involved? How can we derive the value that stakeholders assign to the landscape from these criteria? This does not seem to be explained in the LCA document. 
+# sentence
+- the point on the east bank of Windermere, for instance, gives little indication of precisely to where on this large body of water the text is referring
+- 1:100,000, National land use policy: deciding which areas to protect
+- 1: 25,000, Monitoring regional land use Local management: Managing sensitive areas
+- lt must be possible for decision-making bodies to update the information on their areas easily and quickly.
+- budgetary constraints and time limits.
+- The maps can be fairly easily updated on a regular basis.
+- The results of certain statistical surveys (areolar surveys of land use/cover) might suggest that the problem of the unit area is not really problematical. However, it must be remembered that these surveys sample points, not surfaces. Nonetheless, in the field it is still possible to classify a point as an item in a land cover nomenclature
+- it must provide an acceptable representation of reality.
+-
+-
+-
+
+[@Seresinhe2019]
+#### 3. Materials and methods
+Why? Welsh landscapes --> The planning authorities intend to use LANDMAP to inform decision making.
+### 3.1. Welsh LANDMAP Data
+The expert-based landscape qualities LANDMAP is an all-Wales landscape resource where landscape characteristics, qualities and influences on the landscape are recorded and evaluated  in a nationally consistent data set.
+
+5 landscape characteristics/characterisations based on geology, habitats, visually sensory, historic and cultural character layers: 
+- geological landscape (classification)
+- landscape habitats (classification
+- visual & sensory (classification): maps landscape characteristics and qualities as perceived through our senses, primarily visually. --> The physical attributes of landform and land cover, their visible patterns and their interrelationship. --> Examples of information recorded includes: Landscape elements and features, aesthetic presence of water and seasonality, important
+qualities, boundary type, scale, enclosure, diversity,
+colour, sense of place, night time light, building
+materials, views, scenic quality, rarity, integrity and
+character.
+  • built land
+  • coastal
+  • coastal waters
+  • developed unbuilt land
+  • exposed upland/plateau
+  • flat lowland/levels
+  • hills, lower plateau & scarp slopes
+  • inland water (including associated edge)
+  • lowland valleys
+  • rolling lowland
+  • upland valleys
+- historic landscape
+-
+LANDMAP is managed as a spatial dataset
+• Spatial data consists of observations (surveys in
+LANDMAP) with locations (mapped geographic areas)
+• Geographical Information System (GIS) software records
+and displays this spatial data
+
+Maps and classifies landscapes
+– Describes their characteristics, qualities and components
+
+The Welsh landscape baseline LANDMAP data : Visual and Sensory aspect
+
+#### 3.2. Scenic-Or-Not data 
+is on 1-10 scores. The crowdsourced scenic ratings were reclassified into one of scenic quality classes to correspond to the LANDMAP dataset.
 ```{r}
 library(dplyr)
 library(raster)
@@ -62,6 +130,7 @@ library(rgeos)
 library(sf)
 library(sp)
 library(tidyverse)
+library(xgboost)
 
 ##### 1. collect data
 ###### 1.1. download the visual and sensory aspect polygons for Wales
@@ -125,12 +194,26 @@ sc <-
   # st_as_sf(coords=c("Lon","Lat"), crs=4326) %>%
   # st_transform(crs=27700) %>%
   mutate(gridimage_id = as.integer(gsub("http://www.geograph.org.uk/photo/", "", `Geograph URI`))) %>%
-  Geograph("http://data.geograph.org.uk/dumps/gridimage_geo.tsv.gz", .) ->
+  Geograph("http://data.geograph.org.uk/dumps/gridimage_geo.tsv.gz", .) %>%
+  
+  Geograph("http://data.geograph.org.uk/dumps/gridimage_geo.tsv.gz", .) 
   sc_tab %>%
   drop_na(viewpoint_eastings, viewpoint_northings) %>%
   st_as_sf(coords=c("viewpoint_eastings","viewpoint_northings"), crs=27700) %>%
   as("Spatial") -> 
   sc_new
+
+sc.merge <- read.xlsx("/Users/Yi-Min/Rsession/ScenicOrNot/ScenicOrNot dataset/ScenicOrNot_Geograph_v2.xlsx")
+
+sc_new[Wales.sp, ] %>%
+  as.data.frame() %>%
+  Geograph("http://data.geograph.org.uk/dumps/gridimage_text.tsv.gz", .) ->
+  test
+
+sc_tab2 <- openxlsx::read.xlsx("/Users/Yi-Min/Rsession/ScenicOrNot/ScenicOrNot dataset/ScenicOrNot_Geograph_v2.xlsx")
+
+Geograph("http://data.geograph.org.uk/dumps/gridimage_geo.tsv.gz", .) 
+
 
 
 ###### 1.3. load in the wildness components
@@ -138,17 +221,22 @@ setwd("/Users/Yi-Min/Rsession/ScenicOrNot/predictor variables/Wilderness Dimensi
 #wildness <- list("access","naturalness","remoteness","ruggedness") %>% lapply(raster)
 
 #test <- lapply(list, raster)
-     "access" %>% raster -> Abs
+"absence.asc" %>% raster -> Abs
 "naturalness" %>% raster -> Nat
  "remoteness" %>% raster -> Rem
  "ruggedness" %>% raster -> Rug
 
-Wales.sp <- 
+GB.sp <- 
   raster::getData("GADM", country = "United Kingdom", level = 1) %>%
-  subset(NAME_1 == "Wales") %>%
+  subset(NAME_1 %in% c("England", "Scotland", "Wales")) %>%
+  st_as_sf() %>%
+  group_by(NAME_0) %>%
+  summarise() %>%
+  as("Spatial") %>%
   spTransform(crs(Abs))
-Abs[mask(is.na(Abs), rgeos::gBuffer(Wales.sp, byid=T, width=-100))] <- 19.125
 
+Abs[mask(is.na(Abs), rgeos::gBuffer(GB.sp, byid=T, width=-100))] <- 19.125
+writeRaster(Abs, filename = file.path("/Users/Yi-Min/Rsession/ScenicOrNot/predictor variables/Wilderness Dimensions", "absence"), format="ascii", overwrite=TRUE)
 crs(LCA.sp)
 crs(sc)
 crs(sc_new)
@@ -167,6 +255,115 @@ LCA.sp$Abs <- raster::extract(Abs, LCA.sp, fun = median, na.rm = TRUE) %>% as.ve
 LCA.sp$Nat <- raster::extract(Nat, LCA.sp, fun = median, na.rm = TRUE) %>% as.vector()
 LCA.sp$Rem <- raster::extract(Rem, LCA.sp, fun = median, na.rm = TRUE) %>% as.vector()
 LCA.sp$Rug <- raster::extract(Rug, LCA.sp, fun = median, na.rm = TRUE) %>% as.vector()
+```
+
+```{r}
+sc_new$SQ <- over(sc_new, LCA.sp[,"SQ"]) %>% unlist()
+sc_new$Abs <- raster::extract(Abs, sc_new)
+sc_new$Nat <- raster::extract(Nat, sc_new)
+sc_new$Rem <- raster::extract(Rem, sc_new)
+sc_new$Rug <- raster::extract(Rug, sc_new)
+
+sc.Wales <- 
+  sc_new[Wales.sp, ] %>%
+  st_as_sf() %>%
+  dplyr::select(SQ, SC=Average, Abs, Nat, Rem, Rug)
+
+summary(sc.Wales)
+
+sc.Wales$SQ <- factor(sc.Wales$SQ, levels = c("Low", "Moderate", "High", "Outstanding"), ordered = TRUE) 
+
+plot(sc.Wales$SQ, sc.Wales$SC, main="Fig 1. Boxplot of Scenic-Or-Not ratings vesus four SCENIC QUALITY")
+plot(sc.Wales$SQ, sc.Wales$Abs, main="Fig 2. Boxplot of Absence vesus four SCENIC QUALITY")
+plot(sc.Wales$SQ, sc.Wales$Nat, main="Fig 3. Boxplot of Absence vesus four SCENIC QUALITY")
+plot(sc.Wales$SQ, sc.Wales$Rem, main="Fig 4. Boxplot of Absence vesus four SCENIC QUALITY")
+plot(sc.Wales$SQ, sc.Wales$Rug, main="Fig 5. Boxplot of Absence vesus four SCENIC QUALITY")
+
+plot(sc.Wales$SQ, main="Fig 1. Distribution of SCENIC QUALITY")
+hist(sc.Wales$SC, main="Fig 2. Distribution of SCENIC QUALITY")
+hist(sc.Wales$Abs, main="Fig 3. Distribution of Absence")
+hist(sc.Wales$Nat, main="Fig 4. Distribution of Naturalness")
+hist(log(sc.Wales$Rem), main="Fig 5. Distribution of Remoteness")
+hist(log(sc.Wales$Rug), main="Fig 6. Distribution of Ruggedness")
+
+library(caret)
+##### 4.1. Split data into training and validation dataset
+set.seed(2046)
+trainIndex <- 
+  sc.Wales[-c(which(sc.Wales$SQ=="Unassessed"), which(is.na(sc.Wales$SQ))),] %>%
+  as.data.frame() %>%
+  .$SQ %>%
+  createDataPartition(p = .8, 
+                      list = FALSE, 
+                      times = 1)
+head(trainIndex)
+LCATrain <- 
+  sc.Wales[-c(which(sc.Wales$SQ=="Unassessed"), which(is.na(sc.Wales$SQ))),] %>%
+  st_as_sf() %>%
+  .[ trainIndex,]
+
+LCATest  <- 
+  sc.Wales[-c(which(sc.Wales$SQ=="Unassessed"), which(is.na(sc.Wales$SQ))),] %>% 
+  st_as_sf() %>% 
+  .[-trainIndex,]
+
+### Using gbm package
+LCATrain$SQ = factor(LCATrain$SQ, levels = c("Low", "Moderate", "High", "Outstanding", "Unassessed", "NA"), ordered = FALSE)
+set.seed(2046)
+require(gbm)
+LCA_gbm <- 
+  LCATrain %>%
+  st_drop_geometry() %>%
+  #drop_na() %>%
+  gbm(SQ ~ SC + Abs + Nat + Rug + Rem,
+      distribution = "multinomial",
+      data = .,
+      #weights = ,
+      #var.monotone = NULL,
+      n.trees = 2000,
+      interaction.depth = 3,
+      n.minobsinnode = 15,
+      shrinkage = .005,
+      #bag.fraction = 0.5, 
+      #train.fraction = 1, 
+      cv.folds = 30,
+      #keep.data = TRUE, 
+      #verbose = FALSE, 
+      #class.stratify.cv = NULL,
+      #n.cores = NULL
+      )
+
+#plot(LCA_gbm)
+# find index for number trees with minimum CV error
+best <- which.min(LCA_gbm$cv.error)
+
+# get MSE and compute RMSE
+sqrt(LCA_gbm$cv.error[best])
+
+gbm.perf(LCA_gbm, method = "cv")
+
+###### 4.3. validate the model
+pred = predict.gbm(object = LCA_gbm,
+                   newdata = LCATest,
+                   n.trees = 2000,
+                   type = "response")
+labels = colnames(pred)[apply(pred, 1, which.max)]
+LCATest <- cbind(LCATest, fitted = labels)
+head(LCATest)
+
+# setwd("/Users/Yi-Min/Rsession/ScenicOrNot/scenicness/Results/Figures")
+# png(filename = "test.png", w = 10, h = 10, units = "in", res = 300)
+# par(mar=c(0,0,0,0)) 
+# plot(LCATest[,'fitted'], col = NA)
+# dev.off()
+
+result = data.frame(LCATest$SQ, labels)
+print(result)
+
+# confusion matrix
+cm = confusionMatrix(as.factor(LCATest$SQ), as.factor(labels))
+print(cm)
+
 ```
 ## Analysis
 #### Oridnal Regression Model
@@ -205,8 +402,6 @@ print(result)
 cm = confusionMatrix(as.factor(LCATest$SQ), as.factor(labels))
 print(cm)
 
-
-
 ```
 #### 4. Building a Gradient Boosting Machine
 ### hyper-parameters tuning 
@@ -215,7 +410,123 @@ print(cm)
 # n.trees: number of trees/number of iterations: generally adding more trees to the model can be very slow to overfit. The advice is to keep adding trees until no further improvement is observed.
 
 
+```{r}
+##### grouping the categories of the response vairable
 
+LCA.sp$SQ1 <- LCA.sp$SQ
+LCA.sp$SQ2 <- LCA.sp$SQ
+LCA.sp$SQ3 <- LCA.sp$SQ
+LCA.sp$SQ4 <- LCA.sp$SQ
+
+# case 1: combining "Moderate" and "High" as "Middle"
+LCA.sp[c(which(LCA.sp$SQ1 == "Moderate"), which(LCA.sp$SQ1 == "High")), "SQ1"] <- "Middle"
+
+# case 2: combining "High" and "Outstanding" as "Scenic"
+LCA.sp[c(which(LCA.sp$SQ2 == "High"), which(LCA.sp$SQ2 == "Outstanding")), "SQ2"] <- "Scenic"
+
+# case 3: combining "Low" and "Moderate" as "Non-scenic"
+LCA.sp[c(which(LCA.sp$SQ3 == "Low"), which(LCA.sp$SQ3 == "Moderate")), "SQ3"] <- "Non-scenic"
+
+# case 4: combining "High" and "Outstanding" as "Scenic"; "Low" and "Moderate" as "Non-scenic"
+LCA.sp[c(which(LCA.sp$SQ4 == "High"), which(LCA.sp$SQ4 == "Outstanding")), "SQ4"] <- "Scenic"
+LCA.sp[c(which(LCA.sp$SQ4 == "Low"), which(LCA.sp$SQ4 == "Moderate")), "SQ4"] <- "Non-scenic"
+
+```
+#### Exploratory Analysis
+```{r}
+####### 2. Exploratory analysis
+##### 2.1. boxplot LANDMAP Scenic Quality and Scenic-Or-Not ratings
+### 2.1.1.
+LCA.sp$SQ5 <- LCA.sp$SQ
+LCA.sp$SQ5 <- factor(LCA.sp$SQ5, levels = c("Low", "Moderate", "High", "Outstanding"), ordered = TRUE) 
+
+plot(LCA.sp$SQ5, LCA.sp$SC, main="Fig 1. Boxplot of Scenic-Or-Not ratings vesus four SCENIC QUALITY")
+plot(LCA.sp$SQ5, LCA.sp$Abs, main="Fig 2. Boxplot of Absence vesus four SCENIC QUALITY")
+plot(LCA.sp$SQ5, LCA.sp$Nat, main="Fig 3. Boxplot of Absence vesus four SCENIC QUALITY")
+plot(LCA.sp$SQ5, log(LCA.sp$Rem), main="Fig 4. Boxplot of Absence vesus four SCENIC QUALITY")
+plot(LCA.sp$SQ5, log(LCA.sp$Rug), main="Fig 5. Boxplot of Absence vesus four SCENIC QUALITY")
+
+plot(LCA.sp$SQ5, main="Fig 1. Distribution of SCENIC QUALITY")
+hist(LCA.sp$SC, main="Fig 2. Distribution of SCENIC QUALITY")
+hist(LCA.sp$Abs, main="Fig 3. Distribution of Absence")
+hist(LCA.sp$Nat, main="Fig 4. Distribution of Naturalness")
+hist(log(LCA.sp$Rem), main="Fig 5. Distribution of Remoteness")
+hist(log(LCA.sp$Rug), main="Fig 6. Distribution of Ruggedness")
+
+```
+### logari Remoteness and Ruggedness
+```{r}
+LCA.sp$log.Rem <- log(LCA.sp$Rem)
+LCA.sp$log.Rug <- log(LCA.sp$Rug)
+head(LCA.sp)
+```
+#### Combining the "Moderate" and "High" categories
+```{r}
+library(caret)
+##### 4.1. Split data into training and validation dataset
+set.seed(2046)
+trainIndex <- 
+  LCA.sp[-c(which(LCA.sp$SQ=="Unassessed"), which(is.na(LCA.sp$SQ))),] %>%
+  as.data.frame() %>%
+  .$SQ1 %>%
+  createDataPartition(p = .8, 
+                      list = FALSE, 
+                      times = 1)
+head(trainIndex)
+LCATrain <- 
+  LCA.sp[-c(which(LCA.sp$SQ=="Unassessed"), which(is.na(LCA.sp$SQ))),] %>%
+  st_as_sf() %>%
+  .[ trainIndex,]
+
+LCATest  <- 
+  LCA.sp[-c(which(LCA.sp$SQ=="Unassessed"), which(is.na(LCA.sp$SQ))),] %>% 
+  st_as_sf() %>% 
+  .[-trainIndex,]
+
+# only change the column here
+LCATrain$SQ1 = factor(LCATrain$SQ1, levels = c("Low", "Middle", "Outstanding"), ordered = FALSE)
+ LCATest$SQ1 = factor(LCATest$SQ1, levels = c("Low", "Middle", "Outstanding"), ordered = FALSE)
+
+LCATrain$SQ2 = factor(LCATrain$SQ2, levels = c("Low", "Moderate", "Scenic"), ordered = FALSE)
+ LCATest$SQ2 = factor(LCATest$SQ2, levels = c("Low", "Moderate", "Scenic"), ordered = FALSE)
+ 
+LCATrain$SQ3 = factor(LCATrain$SQ3, levels = c("Non-scenic", "High", "Outstanding"), ordered = FALSE)
+ LCATest$SQ3 = factor(LCATest$SQ3, levels = c("Non-scenic", "High", "Outstanding"), ordered = FALSE)
+ 
+LCATrain$SQ4 = factor(LCATrain$SQ4, levels = c("Non-scenic", "Scenic"), ordered = FALSE)
+ LCATest$SQ4 = factor(LCATest$SQ4, levels = c("Non-scenic", "Scenic"), ordered = FALSE)
+ 
+x_train <- LCATrain %>% 
+  # dplyr::select(SC, Abs, Nat, Rug) %>% #
+  dplyr::select(SC, Abs, Nat, log.Rem, log.Rug) %>% 
+  st_drop_geometry() %>% 
+  as.matrix() %>% 
+  xgb.DMatrix()
+y_train <- LCATrain$SQ %>% 
+  as.integer() %>% 
+  -1 %>%
+  as.factor()
+
+x_test <- LCATest %>% 
+  # dplyr::select(SC, Abs, Nat, Rug) %>% #
+  dplyr::select(SC, Abs, Nat, log.Rem, log.Rug) %>%
+  st_drop_geometry() %>% 
+  as.matrix() %>% 
+  xgb.DMatrix()
+y_test = LCATest$SQ %>% 
+  as.integer() %>% 
+  -1
+
+#  train.data <- LCATrain[, predictors] %>% st_drop_geometry() %>% as.matrix()
+# train.label <- LCATrain$Sq %>% as.integer() %>% -1
+#   test.data <- LCATest[, predictors] %>% st_drop_geometry() %>% as.matrix()
+#  test.label <- LCATest$Sq %>% as.integer() %>% -1
+# 
+# # Transform the two data sets into xgb.Matrix
+# xgb.train = xgb.DMatrix(data=train.data, label = train.label)
+# xgb.test = xgb.DMatrix(data=test.data, label = test.label)
+
+```
 
 ```{r}
 library(caret)
@@ -224,7 +535,7 @@ set.seed(2046)
 trainIndex <- 
   LCA.sp[-c(which(LCA.sp$SQ=="Unassessed"), which(is.na(LCA.sp$SQ))),] %>%
   as.data.frame() %>%
-  .$SQ %>%
+  .$Sq %>%
   createDataPartition(p = .8, 
                       list = FALSE, 
                       times = 1)
@@ -280,7 +591,7 @@ https://www.sciencedirect.com/science/article/pii/S0378778817320844
 nrounds = 1000
 tune_grid <- expand.grid(
   nrounds = seq(from = 100, to = nrounds, by = 100),
-  eta = 0.005,
+  eta = 0.005, #c(0.05, 0.01, 0.005, 0.001),
   max_depth = 5,
   colsample_bytree = 1, # percent of columns to sample from for each tree
   min_child_weight = 1, # minimum node size
@@ -302,6 +613,7 @@ tune_control <- caret::trainControl(
   returnData = FALSE,
   #classProbs = TRUE,
   #summaryFunction = multiClassSummary
+  #summaryFunction = twoClassSummary
 )
 
 set.seed(2046) 
@@ -316,7 +628,8 @@ train_time <- system.time({
     # selectionFunction = "best", "oneSE","tolerance",
     # objective = "multi:softprob",
     # eval_metric = "mlogloss",
-    num_class = 4)
+    num_class = 4
+    )
   })
 xgb_tune$bestTune
 max(xgb_tune$results$Accuracy)
@@ -333,17 +646,48 @@ tuneplot(xgb_tune)
 # Reference
 # https://github.com/topepo/caret/issues/389
 ```
+## for the binary classification
+```{r}
+fit.xgb <- xgb.train(
+  params = list(
+    eta = param$eta, 
+    max_depth = param$max_depth,
+    gamma = param$gamma, 
+    colsample_bytree = param$colsample_bytree,
+    min_child_weight = param$min_child_weight, 
+    subsample = param$subsample
+    ),
+  data = xgb.trainData, 
+  nrounds = param$nrounds, 
+  objective = "binary:logistic"
+  )
+
+#caret
+set.seed(1992)
+fit.xgbTree <- train(Class~., data=trainSet, method="xgbTree",
+                    metric="Accuracy", trControl=trainControl(method="none"),tuneGrid=param)
+
+#####
+###Print results (predictions)
+#####
+print("xgboost")
+predictionxgb <- as.numeric(predict(fit.xgb,  xgb.testData) >= 0.5)
+confusionMatrix(predictionxgb,testSet$Class)
+
+```
 
 ```{r}
 # Model evaluation
-predicted = predict(xgb_tune, x_test)
+#predicted = predict(xgb_tune, x_test)
 # Predict outcomes with the test data
 xgb.pred <-
-  predict(xgb_tune, test.data, reshape=T) %>%
-  plyr::mapvalues(from = c(0,1,2,3), to = c("Low", "Moderate", "High", "Outstanding")) %>%
+  predict(xgb_tune, x_test, reshape=T) %>%
+  plyr::mapvalues(from = c(0,1,2), to = c("Low", "Middle", "Outstanding")) %>%
+  # plyr::mapvalues(from = c(0,1,2), to = c("Low", "Moderate", "Scenic")) %>%
+  # plyr::mapvalues(from = c(0,1,2), to = c("Non-scenic", "High", "Outstanding")) %>%
   data.frame(predict = .)
 
-label = levels(LCATest$SQ)[test.label+1]
+label = levels(LCATest$SQ1)[y_test+1]
 result = data.frame(actual = label, predict = xgb.pred)
 
 # confusion matrix
@@ -597,6 +941,13 @@ OSGB.1km$Abs <- raster::extract(Abs, OSGB.1km, fun = median, na.rm = TRUE) %>% a
 OSGB.1km$Nat <- raster::extract(Nat, OSGB.1km, fun = median, na.rm = TRUE) %>% as.vector()
 OSGB.1km$Rem <- raster::extract(Rem, OSGB.1km, fun = median, na.rm = TRUE) %>% as.vector()
 OSGB.1km$Rug <- raster::extract(Rug, OSGB.1km, fun = median, na.rm = TRUE) %>% as.vector()
+
+rgdal::writeOGR(OSGB.1km, "/Users/Yi-Min/Rsession/ScenicOrNot/scenicness/Grid/OSGB_Grid/Shapefile", "OSGB_Grid_1km_SC.shp", driver="ESRI Shapefile")
+
+rgdal::writeOGR(GB.sp, "/Users/Yi-Min/Rsession/ScenicOrNot/scenicness/Grid/OSGB_Grid/Shapefile", "GreatBritain.shp", driver="ESRI Shapefile")
+
+rgdal::writeOGR(test, "/Users/Yi-Min/Rsession/ScenicOrNot/scenicness/Grid/OSGB_Grid/Shapefile", "OSGB_Grid_1km_SC_new.shp", driver="ESRI Shapefile")
+
 ```
 
 -   document style
