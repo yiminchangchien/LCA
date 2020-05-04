@@ -278,6 +278,114 @@ Low.producer.df <-
   cbind(., Low = Low.producer$`GW User Accuracy`, drop_na(Low.producer$data, SQ))
 # Low.inaccurate <- Low.df[which(Low.df$Low < 0.35), ]
 
+### Accuracy boxplot
+require(ggplot2)
+require(forcats)
+
+bymedian <- with(Outstanding.producer.df[,-c(2,14,15)], reorder(factor(CLS_2), -Outstanding, median, na.rm = TRUE))
+par(cex.axis = 0.3)
+boxplot(Outstanding ~ bymedian, 
+        data = Outstanding.producer.df,
+        xlab = "CLS_2", 
+        ylab = "Outstanding Producer Accuracy",
+        main = "LANDMAP data", 
+        varwidth = TRUE,
+        col = "lightgray",
+        las = 2)
+
+diamonds %>% 
+  as.tibble() %>% 
+  ggplot(aes(reorder(cut, price, IQR), price)) + 
+  geom_boxplot() 
+
+
+library(ggstance)
+Low.producer.df %>%
+  .[, -c(2,14,15)] %>%
+  ggplot(aes(x = Low , y = reorder(CLS_2, -Low, median))) +#stats::IQR
+  geom_boxploth(varwidth = TRUE, aes(fill = CLS_1)) +
+  # geom_boxplot() +
+  theme_bw(base_size = 14) +
+  xlab("Low Producer Accuracy") +
+  ylab("LANDMAP Classification Level 2") ->
+  f1
+
+Moderate.producer.df %>%
+  .[, -c(2,14,15)] %>%
+  ggplot(aes(x = Moderate , y = reorder(CLS_2, -Moderate, median))) +#stats::IQR
+  geom_boxploth(varwidth = TRUE, aes(fill = CLS_1)) +
+  # geom_boxplot() +
+  theme_bw(base_size = 14) +
+  xlab("Moderate Producer Accuracy") +
+  ylab("LANDMAP Classification Level 2") ->
+  f2
+
+High.producer.df %>%
+  .[, -c(2,14,15)] %>%
+  ggplot(aes(x = High , y = reorder(CLS_2, -High, median))) +#stats::IQR
+  geom_boxploth(varwidth = TRUE, aes(fill = CLS_1)) +
+  # geom_boxplot() +
+  theme_bw(base_size = 14) +
+  xlab("High Producer Accuracy") +
+  ylab("LANDMAP Classification Level 2") ->
+  f3
+
+Outstanding.producer.df %>%
+  .[, -c(2,14,15)] %>%
+  ggplot(aes(x = Outstanding , y = reorder(CLS_3, -Outstanding, median))) +#stats::IQR
+  geom_boxploth(varwidth = TRUE, aes(fill = CLS_1)) +
+  # geom_boxplot() +
+  theme_bw(base_size = 14) +
+  xlab("Outstanding Producer Accuracy") +
+  ylab("LANDMAP Classification Level 2") ->
+  f4
+
+par(mar = c(0,0,0,0))
+multiplot(list(f1, f2, f3, f4), cols = 2)
+
+ggplot() + 
+  geom_sf(data = LCA, aes(fill = CLS_1), color = NA) +
+  theme(axis.line = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "bottom",
+        legend.direction = "horizontal",
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())
+
++
+  geom_sf(data =
+            LCA[unlist(st_intersects(Outstanding.producer.sf[which(Outstanding.producer.sf$Nonexpert.1 == 1), ], LCA, sparse = TRUE)), ],
+          aes(fill = CLS_3)) +
+  
+  
+  # Moderate.producer.df %>%
+  # High.producer.df %>%
+  # 
+  
+
+       aes(x = reorder(CLS_2, Outstanding, fun = median, desc = TRUE), y = Outstanding)) + 
+  geom_boxplot() +
+  geom_jitter(position=position_jitter(0.2)) +
+  theme_bw(base_size = 14) +
+  xlab("CLS_2") +
+  ylab("Outstanding Producer Accuracy") +
+  scale_fill_discrete(guide = guide_legend(title = "CLS_2"))
+
+
+
+ggplot(iris, aes(x = fct_reorder(Species, Sepal.Width, fun = median, .desc =TRUE), y = Sepal.Width)) + 
+  geom_boxplot(aes(fill = fct_reorder(Species, Sepal.Width, fun = median, .desc =TRUE))) + 
+  geom_jitter(position=position_jitter(0.2)) +
+  theme_bw(base_size = 14) +
+  xlab("Species") +
+  ylab("Sepal width") +
+  scale_fill_discrete(guide = guide_legend(title = "Species"))
+
+
+
 wal.df <- broom::tidy(Wales.sp)
 # np.df <- tidy(np.shp)
 # aonb.df <- tidy(aonb.shp)
@@ -294,6 +402,7 @@ ggplot.func <- function(data.i = Outstanding.df, i = 2, palette = "GnBu", tab = 
                  colour="grey", fill="grey") +
     coord_equal() + 
     geom_point(data = data.i, aes(x = coords.x1, y = coords.x2, colour = val), size = 0.8) +
+    geom_spoke(data = data.i, aes(x = coords.x1, y = coords.x2, angle = angle), arrow = arrow(length = unit(0.1, "cm")), radius = 2000) +  
     # geom_point(data = data.i[index_Expert, ], aes(x = coords.x1, y = coords.x2), size = 0.5, shape = 1) + #alpha = 0.2
     # geom_point(data = data.i[index_Nonexpert, ], aes(x = coords.x1, y = coords.x2), size = 0.5, shape = 3, color = "red") +
     labs(x = NULL, y = NULL, title = tit, size = 1) +
@@ -337,7 +446,15 @@ multiplot <- function(plot.list, file, cols=3, layout=NULL) {
     }
   }
 }
+
+Outstanding.user.df.orig <- Outstanding.user.df
+
+ggplot(Outstanding.user.df[1:130,-2], aes(coords.x1, coords.x2)) +
+  geom_point() +
+  geom_spoke(aes(angle = angle*pi/180), arrow = arrow(length = unit(0.2, "cm")), radius = 4000)
+
 ## FIGURE 3. mapping GWR and MGWR estimates for the wildness covariates
+test <- ggplot.func(data.i = Outstanding.user.df[,-2], i = 11, palette =   "GnBu", tab = "User Accuracy")
 p1 <- ggplot.func(data.i = Outstanding.user.df[,-2], i = 11, palette =   "GnBu", tab = "User Accuracy") #  TV = gwr_tv,
 p2 <- ggplot.func(data.i =        High.user.df[,-2], i = 11, palette =   "RdPu", tab = "User Accuracy") 
 p3 <- ggplot.func(data.i =    Moderate.user.df[,-2], i = 11, palette =   "YlGn", tab = "User Accuracy") 
@@ -410,25 +527,54 @@ ggm1 = ggplot() +
   theme_void()
 
 ggm2 = ggplot() + 
-  geom_sf(data = LCA[which(LCA$VS_46 == "Outstanding"), ], fill = NA) +
+  # geom_sf(data = LCA[which(LCA$VS_46 == "Outstanding"), ], fill = NA) +
+  geom_sf(data =
+            LCA[unlist(st_intersects(Outstanding.producer.sf[which(Outstanding.producer.sf$Nonexpert.1 == 1), ], LCA, sparse = TRUE)), ],
+          aes(fill = CLS_3)) +
+  # geom_sf(data = LCA, aes(fill = CLS_3)) +
   geom_sf(data = Outstanding.producer.sf, aes(col = Outstanding)) +
   geom_sf(data = Outstanding.producer.sf[which(Outstanding.producer.sf$Expert == 1),], shape = 1) + 
   geom_sf(data = Outstanding.producer.sf[which(Outstanding.producer.sf$Nonexpert.1 == 1), ], 
           shape = 3, 
           col = "red") +
-  geom_sf_text(data = Outstanding.producer.sf[which(Outstanding.producer.sf$Nonexpert.1 == 1), ],
-               aes(label = class),
-               # position = "identity",
-               nudge_x = 2000,
-               nudge_y = 1000) +
-  # geom_text_repel(data = Outstanding.producer.sf[which(Outstanding.producer.sf$Nonexpert.1 == 1), ],
-  #                 aes(label = class), 
+  # ggrepel::geom_text_repel(
+  #   data = Outstanding.producer.sf[which(Outstanding.producer.sf$Nonexpert.1 == 1), ],
+  #   aes(label = image_id, geometry = geometry),
+  #   stat = "sf_coordinates",
+  #   min.segment.length = 0
+  # ) +
+  # geom_sf_text(data = LCA[which(LCA$VS_46 == "Outstanding"), ],
+  #              aes(label = CLS_3),
+  #              position = "identity") +
+  #              # check_overlap = TRUE,
+  #              # col = "red",
+  #              # nudge_x = 2000,
+  #              # nudge_y = 1000) +
+  geom_sf_text(data = LCA[unlist(st_intersects(Outstanding.producer.sf[which(Outstanding.producer.sf$Nonexpert.1 == 1), ], LCA, sparse = TRUE)), ],
+               aes(label = CLS_3),
+               position = "identity") +
+  # geom_sf_text(data = Outstanding.producer.sf[which(Outstanding.producer.sf$Nonexpert.1 == 1), ],
+  #              aes(label = image_id),
+  #              # position = "identity",
+  #              # check_overlap = TRUE,
+  #              col = "red",
+  #              nudge_x = 2000,
+  #              nudge_y = 1000) +
+  # geom_sf_text(data = Outstanding.producer.sf[which(Outstanding.producer.sf$Expert == 1), ],
+  #              aes(label = image_id),
+  #              # position = "identity",
+  #              # check_overlap = TRUE,
+  #              col = "black",
+  #              nudge_x = 2000,
+  #              nudge_y = 1000) +
+  # ggrepel::geom_text_repel(data = Outstanding.producer.sf[which(Outstanding.producer.sf$Expert == 1), ],
+  #                 aes(label = class, x = vp_east, y = vp_north),
   #                     # x = st_coordinates(geometry)[1],
   #                     # y = st_coordinates(geometry)[2]),
   #                 arrow = arrow(length = unit(0.03, "npc"), type = "closed", ends = "first"),
-  #                 direction = "y", 
+  #                 direction = "y",
   #                 xlim  = 1000) +
-  
+
   # geom_text_repel(
   #   nudge_x      = -0.35,
   #   direction    = "y",
@@ -462,6 +608,8 @@ ggm2 = ggplot() +
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank())
+
+  
   
 gg_inset_map1 = ggdraw() +
   draw_plot(ggm2, x = 0.2, y = 0.2,) +
@@ -469,6 +617,9 @@ gg_inset_map1 = ggdraw() +
 
 gg_inset_map1
 ggm2
+
+ggm2 + 
+  geom_spoke(data = Outstanding.producer.df[which(Outstanding.producer.df[,-2]$Nonexpert == 1),-2], aes(x = coords.x1, y = coords.x2, angle = ((-angle+90)/360)*2*pi, radius = 1000), arrow = arrow(length = unit(0.1, "cm")))
 
 
 

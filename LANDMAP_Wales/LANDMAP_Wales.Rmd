@@ -23,9 +23,7 @@ footnote:
   - code: 2
     text: "Equal contribution"
 abstract: |
-  This is the abstract.
-
-  It consists of two paragraphs.
+This paper describes the potential of refining the process of landscape characterisation by incorporating the crowdsourced perceptions of scenic beauty into the widely adopted Landscape Character Assessment (LCA) approach in the UK. This study demonstrate the locally sensitive method widely used in the remote sensing studies for identifying the low concensus areas of scenic beauty between expert and non-expert perspectives within Wales.
 
 journal: "Landscape and Urban Planning"
 date: "`r Sys.Date()`"
@@ -44,7 +42,21 @@ The Elsevier article class
 ==========================
 
 #### Introduction
-Landscape designation --> designating criteria --> a few expert judgement --> to some extent, landscape designation is based on character --> Landscape Character Assessment (descriptive v.s. evaluative) --> evaluative consideration (i.e. how is the evaluative components under current character system?)
+Landscape value is derived from human perception which is influenced by personal feelings and opinions, it cannot be objective. Additionally, when it comes to planning (e.g. landscape designation), expert judgement seems superior than public judgement. The single use of experts in assessment methods can be practical while the resource is constrained. characterisation of landscape using two dimensional information is highly contested, therefore ignoring the importance of the general public opinions. Expert judgement seems superior than public judgement. --> how to measure whether there is consensus about the value of a landscape or not
+
+
+use visual and sensory aspect area as a framework for field survey 
+
+One of the practicality of the existing framework is the widely adopted Landscape Character Assessment (LCA), which is based on two phases of process: characterisation and evaluation. Firstly, landscape is classified into homogenous categories in accordance with physical character such as geology, landform, land cover. Secondly, However, characterisation of landscape is a matter of interpretation and perception and this task is typically reserved for professionals, making--> designating criteria --> a few expert judgement --> to some extent, landscape designation is based on character --> Landscape Character Assessment (descriptive v.s. evaluative) --> evaluative consideration (i.e. how is the evaluative components under current character system?)
+
+Neogeography
+Scenic-Or-Not
+
+Views of stakeholders and the public can be strong indicators as to whether there is consensus about the value of a landscape
+
+- Those involved in landscape planning were sometimes reluctant to tackle the visual and perceptual aspects of landscape, as opposed to the specific and often more easily dealt with aspects of land use and management, such as agriculture, forestry, recreation and nature conservation.
+
+- Scenic-Or-Not provides an invaluable data source which can be manipulated and interro- gated in many different ways and linked to other data sets.
 
 - In order to make these judgements (some of which are subjective) in a transparent and consistent way, this Guidance sets out which criteria Natural England intends to use.
 
@@ -60,9 +72,6 @@ Landscape designation --> designating criteria --> a few expert judgement --> to
 
 - Characterisation of landscape is a matter of interpretation and perception;
 
-- When it comes to planning, decisions have to be made, so ignoring its importance by not valuing historic landscapes seems impractical;
-
-- Landscape is perceived by people, but as perception is influenced by personal feelings and opinions, we cannot be objective.
 
 - the landscapes are classified on classified of low, moderate, high or outstanding quality.
 # qualitative to quantitative evaluation
@@ -84,11 +93,20 @@ combine spatial analysis with close reading.
 
 [@Seresinhe2019]
 #### 3. Materials and methods
-Why? Welsh landscapes --> The planning authorities intend to use LANDMAP to inform decision making.
-### 3.1. Welsh LANDMAP Data
-The expert-based landscape qualities LANDMAP is an all-Wales landscape resource where landscape characteristics, qualities and influences on the landscape are recorded and evaluated  in a nationally consistent data set.
+The process of landscape characterisation in the UK is primarily based on two-dimensional maps. The scenic quality is evaluated by professionals through site survey.
 
-5 landscape characteristics/characterisations based on geology, habitats, visually sensory, historic and cultural character layers: 
+LANDMAP is Welsh national landscape  landscapes --> The planning authorities intend to use LANDMAP to inform decision making.
+### 3.1. Welsh LANDMAP Data
+LANDMAP is 
+
+The expert-based landscape qualities LANDMAP is an all-Wales landscape resource where landscape characteristics, qualities and influences on the landscape are recorded and evaluated in a nationally consistent data set.
+
+Characterisation sub-divides the landscape into areas based on the visual continuity of physical characteristics such as geology, landform and land cover applied through the lens of spatial hierarchical mapping. 
+
+The Visual & Sensory aspect is organised according to a hierarchical classification system. This typology aims to classify the landscape into areas of distinct Visual & Sensory character, and is based on a hierarchy of four levels.
+
+five aspects of landscape classification/characteristics/characterisations — geology, habitats, sensory (primarily visually), historic and cultural characters. These are evaluated and recorded as spatial data. 
+
 - geological landscape (classification)
 - landscape habitats (classification
 - visual & sensory (classification): maps landscape characteristics and qualities as perceived through our senses, primarily visually. --> The physical attributes of landform and land cover, their visible patterns and their interrelationship. --> Examples of information recorded includes: Landscape elements and features, aesthetic presence of water and seasonality, important
