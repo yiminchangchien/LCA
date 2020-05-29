@@ -1,0 +1,522 @@
+---
+title: Local accuracy assessment between the formal and informal measures of landscape aesthetics
+runninghead: Uthor \emph{et al}.
+author:
+- name: Yi-Min Chang Chien*
+  num: 1
+- name: Steve Carver
+  num: 2
+- name: Alexis Comber
+  num: 3
+address:
+- num: 1
+  org: School of Geography, University of Leeds, UK
+- num: 2
+  org: School of Geography, University of Leeds, UK
+- num: 3
+  org: School of Geography, University of Leeds, UK
+corrauth: Yi-Min Chang Chien
+email: gyymcc@leeds.ac.uk
+abstract: This study examine the visual and sensory aspect areas classified by the formal Landscape Character Assessment (LCA) against the geo-referenced scenic scores from a crowdsourcing campaign across Wales, using a geographically weighted analysis. The findings suggest that there were clear spatial patterns in the spatially distributed errors for both opposite ends of the scenic quality spectrum (i.e. outstanding and low) but those for the middle levels (i.e. high and moderate) showed scattered and noisy patterns. A close-up of errors overlapped with the LCA classified areas reveals the underlying landscapes were topographically complex. The findings were discussed in terms of the implications for the perceptual aspect of the landscape characterisation as well as the limitations regarding the reliability of the crowdsourced data. A number of areas for future studies were also suggested.
+keywords: Landscape character assessment; crowdsourcing; Geogrpahically weighted errors
+classoption:
+  - Royal
+  - times
+bibliography: library.bib
+bibliographystyle: sageh
+output:
+  word_document
+---
+
+
+```{r setup, include=FALSE}
+#   rticles::sim_article:
+#    keep_tex: TRUE
+
+knitr::opts_chunk$set(eval=T, echo=F, cache=T, message=F, warning=F, cache.lazy=F)
+options(tinytex.verbose=T)
+library(dplyr)
+library(ggplot2)
+library(ggstance)
+library(GWmodel)
+library(kableExtra)
+library(knitr)
+library(magrittr)
+library(openxlsx)
+library(sf)
+library(tidyr)
+```
+# 1. Introduction
+Assessing landscape aesthetic are challenging given people could have different opinions on whether a particular landscape is scenic or not. There are, hence, centuries of debate between expert-based and perception-based approaches for landscape aesthetic assessment [@Daniel2001]. The expert-based approach is expedient, avoiding the controversial issues on people's preferences and widely used in landscape management and planning practices such as nature preservation and designation. This has also faced some criticisms, referring to lack of objectivity, transparency, standardised methodology, and replicability (even among experts) [@Daniel2001; @Terkenli2001]. As the development of the European Landscape Convention's (ELC) (Council of Europe, 2003) placed the public central to any understaning of landscape by providing a broader definition for landscape as 'an area... as perceived by people", the focus of landscape assessment has, therefore, been shifted from expert to local/nonexpert knowledge, requiring the establishment of procedures for public participation in the landscape management, protection and planning practices [@Jones2007]. Although this brings the existing challenges to the forefront again, most implementation of this democratic intent has not hitherto been widely accepted [@Conrad2011a].
+
+The Landscape Character Assessment (LCA) methodology [@Swanwick2002] in the UK is one of the landscape assessment frameworks in response to the ELC guidance, providing an important mean of communication for underpinng policy-making. The LCA seeks to develop a typology of landscape character based on the visual distinctiveness and continuity of particular combinations of geology, landform, soils, vegetation, land use, field patterns, and human settlement, applied through spatial hierarchical mapping. Among the practical assessments, the dominance of expert perspectives in the framing of landscape values was, nevertheless, evidenced by [@Butler2016] where landscape aesthetic values, focused herein, are no exception. First, most of the landscape characterisations are determined by data sets derived from expert knowledge [@Groom2006]. Second, the subsequent assessment process heavily relies on the expert subjective judegments, based on their field surveys at a few representative viewpoints from which the valuation is formulated, and then generalised to the entire character area. Some reservations in relation to this process is that the trained experts could have different preferences and interpretations for landscapes, shpaed by their professional backgrounds and experiences [@Dramstad2006] and that the extrapolation of perceived landscape characteristics may be problematic for topographically complex areas where the consideration of the perceived scene changed with viewpoints is particularly needed. The other issue is central to the levels of precision where the qualitative judgement only consist of several ordinal levels of landscape qualites [@Daniel1983]. For example, the LCA approach, only determines four classes of scenic quality, roughly outstanding, high, moderate and low, often with a very substantial proportion of areas classified as moderate and high. As such, relevant data sources, less bounded by the professional biases may help to counter the subjective point of view and contribute to going beyond the factual expert knowledge.
+
+Over the past decades, the advent of crowdsourced spatial information have been increasingly used to understand human/landscape interactions from local to continental scale [@Tenerelli2016; @Dunkel2015; @VanZanten2016]. As abundantly generated by citizen sensors [@Goodchild2007], these data are more close to human on-the-ground  perceptions, therefore holding great potential for expanding our knowledge about what is valued or preferred landscape from a nonexpert's perspective. In the UK, a web-based crowdsourcing project, namely Scenic-Or-Not, for example, aims at collecting people's landscape preferences at a granularity of 1 km^2. Participants are invited to rate the scenicness of the randomly presented photographs on a 1-10 scale. Empirical studies using these dataset included investigating the impact of scenic beauty on human health [@Seresinhe2015] and happiness [@Seresinhe2019], exploring the composition of landscape scenic beauty in the eye of the public [@Seresinhe2017], employing it to verify landscape scenic estimation based on Flickr and OpenStreetMap data [@Seresinhe2018] and building a language model to predict landscape scenicness [@Chesnokova2017]. If considering the current landscape characterisation as a knowledge generation approach, the nationwide and evenly distributed observations may be a supplementary information as field checking for the expert-based LCA. In turn, the spatial granularities of these data also provide researchers with opportunity to analyse the local difference between these formal and informal measures for landscape preferences. This local assessment can be a useful in highlighting some major spatial trend, reflecting where there was the greatest disagreement/agreement for further classification or checking of targeted areas.    
+
+In remote sensing literature, the analytical framework for assessing the accuracy of land cover classification locally, can also suit the situation with the ordinal levels of scenic measurement. Traditionally, the accuracy measure was evaluated by the use of cross-tabulations among different classes of land covers, providing an summary statistics (e.g. overall accuracy, producer's accuracy and user's accuracy) for the entire classification but overlooking the potential local variation [@Foody2005]. The essence of local accuracy assessment is to derive spatial statistics by the use of the geographical proximity of observations rather than the use of the entire set of observations. In this spirit, the extended approach were proposed by [@Comber2012] to accommdate spatial dependencies and spatial autocorrelation of errors in the data. The geographically weighted framework was employed to estimate the location-specific statistics where observations only within a moving window/kernel were included and weighted according to their distance to the kenerl centre in the calculation. Such location-specific statistics can be interpolated and mapped to gain a picture of spatially distributed accuracies. Hence, the adoptation of such spatially explicit approaches as an analytic tool may also fill the methodolgical deficiencies for handling multiple landscape values in the field of landscape assessment [@Butler2016].
+
+Motivated by the ELC's call, the aims of this study was to compare the evaluations of landscape scenic quality between experts and nonexperts in search of synergy. Furthermore, the primary attempt was to leverage the granular coverage of crowdsourced spatial data regarding scenicness and explore the spatial variation of the disagreements/agreements in landscape aethetic quality. This study is not intended to aspire to any ultimate resolution for the landscape classification system raised above, but instead to seek for the benefits of synergy to enhance a local characterisation. To this end, a categorisation of the quantitative information was a prerequisite for a comparison with the qualitative information. The summary statistics of accuracies were firstly calculated using the error matrix, followed by the local statistics of accuracies to reveal the spatial variations in the degree of disagreements/agreements on landscape scenic quality between experts and nonexperts across geographic space.
+```{r  results="hide"}
+#### Data preparation
+## Download the boundary of Wales
+temp <- tempfile()
+temp2 <- tempfile()
+download.file("https://datashare.is.ed.ac.uk/bitstream/handle/10283/2410/Wales_boundary.zip", temp)
+unzip(zipfile = temp, exdir = temp2)
+"Wales boundary.shp" %>%
+  file.path(temp2, .) %>%
+  st_read(stringsAsFactors = FALSE) %>% 
+  st_transform(crs = 27700) %>%
+  st_combine() ->
+  Wales
+rm(list = c("temp", "temp2"))
+
+## import the Scenic-Or-Not dataset 
+read.xlsx("/Users/Yi-Min/Rsession/ScenicOrNot/ScenicOrNot dataset/ScenicOrNot_Geograph_v8.xlsx") %>%
+  st_as_sf(coords=c("sb_east","sb_north"), crs=27700) %>%
+  .[Wales, ] ->
+  sc
+
+## Download the Visual and Sensory Aspect Areas for Wales
+temp <- tempfile()
+temp2 <- tempfile()
+download.file("http://lle.gov.wales/catalogue/item/LandmapVisualSensory.zip", temp)
+unzip(zipfile = temp, exdir = temp2)
+"NRW_LandMap_Visual_SensoryPolygon.shp" %>%
+  file.path(temp2, .) %>% 
+  st_read(stringsAsFactors = FALSE) %>%
+  st_transform(crs = 27700) ->
+  LCA
+rm(list = c("temp", "temp2"))
+```
+# 3. Data and methods
+
+## 3.1 LANDMAP data
+Key to the selection of Wasles as the study area were the availability of formal measures in relation to scenic quality in spatial format. On the other hand, the attmpt of this study is to test for a national applicability. The Welsh landscape character assessment, namely LANDMAP, is mapped and recorded as five themed spatial datasets including geological landscape, landscape habitats, visual and sensory, historic landscape and cultural landscape in the form of GIS polygons. Each dataset is also known as aspect areas where landscapes were characterised on a four-level hierarchical classification system and attributed with associated textual information, inculding description, evaluation and assessment in terms of its unique perspective. Among these discrete geographical areas, the dataset of the visual and sensory aspect, identified on the level 3 of classification contains 1,991 unique discrete polygons, primarily characterised in accordance with landform and land cover, was used in this study. Except 5 areas unclassified, each aspect area was attributed by the four levels of scenic quality (i.e. low, moderate, high and outstanding), each of which are explained in more detail in Table 1. This aspect classification provides expert-based landscape values concerned with the perceptual qualities of landscapes and was used as the expert-based evaluation of landscape aesthetics.  
+```{r results="hide"}
+tb1 <- data.frame(
+ Scale  = c("Low", "Moderate", "High", "Outstanding"),
+ Interpretation = c(
+   "Landscapes with very limited aesthetically pleasing scenes.",
+   "Landscapes with a few scenes of a picturesque quality, which are aesthetically pleasing in composition. These areas are notable locally for these.",
+   "A landscape with some scenes of a picturesque quality, which are aesthetically pleasing in composition. The area is notable for these regionally.",
+   "A landscape offering many scenes of a picturesque quality throughout the area, which are aesthetically pleasing in composition. The area is iconic for these nationally and internationally."
+   )
+ )
+```
+```{r}
+# Table 1. The interpretations of scenic quality in the LANDMAP visual and sensory aspect area. 
+kable(tb1, booktabs = T, format = "latex", caption = "1") %>%
+  kable_styling(full_width = F) %>%
+  column_spec(1, bold = T) %>%
+  column_spec(2, width = "30em")
+```
+## 3.2 Scenic-Or-Not data
+The nonexpert perspectives on landscape scenic beauty were collated from the Scenic-Or-Not campaign (http://scenicornot.datasciencelab.co.uk/) where participants can rate how scenic the randomly presented photograph is on a 1-10 scale. These images are sourced from the Geograph worldwide project (https://www.geograph.org/), which started from the UK with the aim of collecting geographically representative photographs and information (e.g. human or physical features) for every square kilometre and expanded to Germany, and have associated locations and descriptions, though not shown in the Scenic-Or-Not campaign. The freely availabe Scenic-Or-Not dataset contains basic image information including location and corresponding Geograph URI as well as the average rating, population variance and the votes for each photo, compiled up to February 2015. Note that there is only one single image representing each square kilometre, but ensuring that the evaluation of scenic quality is distributed by areal proportionality. These geotagged scenic ratings was shown in the right of Figure \ref{fig:Figure1}.
+
+For the purpose of comparison, the average of scenic scores was broken down into equvilent classes as the qualitative levels of scenic quality from the LANDMAP dataset using equal interval classification. Every point within the asepct area was, then, assigned the corresponding class of scenic quality from the LANDMAP evaluation by spatial intersection where 142 sampling points with NA and unassessed classes were discarded. The class distribution of spatially joined LANDMAP evaluation are imbalanced where the majority classes are in the middle and approximately equal (i.e. moderate: 39% and high: 40%) while the low class is very infrequent as 7% of the dataset as well as the outstanding class as 13%. The classification of Scenic-Or-Not evaluation is more highly imbalanced with 3% and 13% increase in the low and moderate classes but 4% and 10% decrease in the high and outstanding classes. A set of 19,369 point observations across the entire Wales remains for following analysis. Notably, the locational information of Scenic-Or-Not has approximately 100 m shift from the subject or viewpoint locations, annotated in the Geograph. Hence, these scenic ratings were referred back to their subject locations in the Geograph, which were pinpointed in three levels of precision (100 m: 3,549; 10 m: 14,215; 1 m: 605) by the contributors. 
+
+```{r Figure1, fig.height=4, fig.cap="(Left)  Expert perspectives on scenicness based on the Welsh visual and sensory aspect area. (Right) Non-expert perspectives on scenicness within Wales from the Scenic-Or-Not dataset.\\label{fig:Figure1}", out.width='100%'}
+sc %>% 
+  st_join(., LCA[,c(2,6,8:11,63)], join = st_intersects) %>%
+  mutate(LANDMAP = factor(.$VS_46, levels = c("Low","Moderate","High","Outstanding"))) %>%
+  mutate(ScenicOrNot = cut(mean, c(0, 2.5, 5, 7.5, 10))) %>%
+  drop_na(., LANDMAP) %>%
+  as("Spatial") ->
+  data
+levels(data$ScenicOrNot) = c("Low","Moderate","High","Outstanding")
+
+f1a <- ggplot() + 
+  geom_sf(data = LCA, aes(fill = VS_46), color = NA) +
+  theme(axis.line = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "bottom",
+        legend.direction = "horizontal",
+        legend.title = element_text(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())
+
+f1b <- ggplot() +
+  geom_sf(data = Wales, fill = "grey92", color = NA) + 
+  geom_sf(data = sc, aes(colour = mean), size = 0.3) +
+  scale_colour_continuous(name = "Median of Scenic Rating", low = "Yellow", high = "Brown",
+ 		 					   space = "Lab", na.value = "grey50", breaks = c(2.5, 5.0, 7.5, 10), 
+ 		 					   labels = c(2.5, 50., 7.5, 10), limits = c(1, 10), 
+ 		 					   guide = guide_colourbar(title = "Mean of scenic rating", 
+ 		 					                           title.position = "top",
+ 		 					                           title.hjust = 0.5,
+ 		 					                           title.vjust = 0.8,
+ 		 					                           barwidth = 10)) +
+  theme(axis.line = element_blank(),
+  		 	axis.text = element_blank(),
+  		 	axis.ticks = element_blank(),
+  		 	legend.position = "bottom",
+  		 	legend.direction = "horizontal",
+  		 	legend.title = element_text(face = "plain", family = "Helvetica", size = 10),
+  		 	legend.text = element_text(face = "plain", family = "Helvetica", size = 6),
+  		  panel.grid.major = element_blank(),
+  		 	panel.grid.minor = element_blank(),
+  		 	panel.border = element_blank(),
+  			panel.background = element_blank()) 
+
+## multiplot function
+multiplot <- function(plot.list, file, cols=3, layout=NULL) {
+  library(grid)
+  numPlots = length(plot.list)
+  if (is.null(layout)) {
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  if (numPlots==1) {
+    print(plots[[1]])
+  } else {
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    for (i in 1:numPlots) {
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      print(plot.list[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                          layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+par(mar = c(0,0,0,0))
+fig1 <- multiplot(list(f1a, f1b), cols = 2)
+```
+## 3.3 Geographically weighted analysis
+
+For the purpose of how well the expert-based landscape assessment can explain the nonexpert-based one, the LANDMAP data was referred to the classified scenic quality while the Scenic-Or-Not data was regarded as the observed one, where scenic quality evaluated by the Scenic-Or-Not was deemed representative and reliable. Then, for each level of scenic quality, a logistic linear regression was fit as follows:
+
+\begin{equation}
+y = a + bX_{i}+\epsilon_{i}
+\label{eq:equation1}
+\end{equation}
+
+Subsequently, the probability of accuracy can be estimated using a logistic regression to analyse the classified scenic quality against the observed scenic quality in the following way:
+
+\begin{equation}
+P(y=1) = logit(b_{0}+b_{1}x_{1})
+\label{eq:equation2}
+\end{equation}
+
+where $P(y=1)$ is the probability that the observed scenic quality class, $y$, is correctly predicted by the classified data, $x_{1}$, $b_{0}$ is the intercept term and $b_{1}$ is the slope. For a given class, the result describes the probability of accuracy that the observed quality equal 1, given that the classified one equal 1. The accuracy for each class can be mapped so that the spatial distribution of agreements/disagreements in scenicness between experts and nonexperts can be explored and assessed.
+
+# 4. Results
+## 4.1 Global error matrix
+The cross-tabulation table of the expert (rows) versus the nonexpert (columns) evaluation at the entire set of 18,369 point observations are shown in Table 1 where the diagonal values describe the counts of the observation points assigned at the same levels of scenic quality. The overall accuracy of 43% was, then, calculated, indicating the degree of agreements in landscape scenic quality between two dataset is low. The focus, herein, is to understand the likelihood that what was observed scenic quality by nonexperts really is the classified one by experts. Each level of scenic quality has a similar accuracy of 45% with the exception of the low level (24%). 
+
+```{r}
+# confusion matrix
+tab <-
+  base::table(data$LANDMAP, data$ScenicOrNot, useNA = "no") %>%
+  cbind(., Total = as.integer(rowSums(.))) %>% 
+  rbind(., Total = as.integer(colSums(.))) 
+
+  # gdata::cbindX(., data.frame(
+  #   Percentage = diag(base::table(data$LANDMAP, data$ScenicOrNot, useNA = "no"))/tab[1:4,'Total'])) %>%
+  # # dplyr::bind_rows(., data.frame(t(diag(base::table(data$LANDMAP, data$ScenicOrNot, useNA = "no"))/tab['Total',1:4]))) %>%
+  # gtools::smartbind(., data.frame(t(diag(base::table(data$LANDMAP, data$ScenicOrNot, useNA = "no"))/tab['Total',1:4]))) %>%
+  # round(2)
+# 
+#   cbind(., Percentage = c(round(
+#     diag(base::table(data$LANDMAP, data$ScenicOrNot, useNA = "no"))/tab[1:4,'Total'],2),"")) %>%
+#   rbind(., Percentage = c(round(
+#     diag(base::table(data$LANDMAP, data$ScenicOrNot, useNA = "no"))/tab['Total',1:4],2),NA)) ->
+#   test
+
+# library(gdata)
+# cbindX(data.frame(x), data.frame(y), z)
+# test <-
+#   rbind(., Percentage = diag(test))
+#   c(diag(base::table(data$LANDMAP, data$ScenicOrNot, useNA = "no"))/tab[1:4,'Total'],"")
+round(tab, 2) %>%
+  kable(., booktabs = T, format = 'latex', caption = "2") 
+```
+
+```{r eval=F}
+## User's accuracy function
+UserAccuracy <- function(data = data, i = 1, dMat = dMat, bw = bw) {
+  # 1. Create a data.frame
+  class.list <- unique(data$LANDMAP)[order(unique(data$LANDMAP))]
+  class <- class.list[i]
+  data$Expert <- (data$LANDMAP == class) * 1
+  data$Nonexpert <- (data$ScenicOrNot == class) * 1
+
+  # 2. GLM for user's accuracy
+  mod <- glm(Nonexpert ~ Expert, data = data, family = binomial)
+  
+  # 3. Define and apply the alogit function
+  alogit <- function(x){exp(x)/(1+exp(x))}
+  mod.coefs <- mod$coefficients
+  mod.coefs[2] <- sum(mod.coefs)
+  # P(y = 1|x = 1)
+  mod.user <- alogit(mod.coefs[2])
+  cat("User's accuracy:", round(mod.user, 3))
+
+  # 5. GW user's accuracy
+  data %>%
+    ggwr.basic(Nonexpert ~ Expert,
+               data = .,
+               bw = bw,
+               family = "binomial",
+               kernel = "gaussian",
+               adaptive = FALSE,
+               cv = FALSE,
+               dMat = dMat) ->
+    gwr.mod
+
+  coefs <- data.frame(gwr.mod$SDF)[, 2:3]
+  coefs[, 2] <- rowSums(coefs)
+  # P(x = 1|y = 1)
+  gwr.user <- alogit(coefs[, 2])
+  return(list("Global User Accuracy" = mod.user, 
+                               "GLM" = mod,
+                         "Bandwidth" = bw,
+                              "data" = data.frame(data),
+                  "GW User Accuracy" = gwr.user, 
+                            "GW-GLM" = gwr.mod))
+}
+
+# distance matrix
+dMat <- gw.dist(coordinates(data))
+
+            Low.user <- UserAccuracy(data = data, i = 1, dMat = dMat, bw = 10000)
+       Moderate.user <- UserAccuracy(data = data, i = 2, dMat = dMat, bw = 10000)
+           High.user <- UserAccuracy(data = data, i = 3, dMat = dMat, bw = 10000)
+    Outstanding.user <- UserAccuracy(data = data, i = 4, dMat = dMat, bw = 10000)
+
+### Data Preparation
+Outstanding.user.df <- 
+  as.data.frame(Outstanding.user$`GW-GLM`$SDF) %>%
+  cbind(., Outstanding = Outstanding.user$`GW User Accuracy`, Outstanding.user$data)
+
+High.user.df <- 
+  as.data.frame(High.user$`GW-GLM`$SDF) %>%
+  cbind(., High = High.user$`GW User Accuracy`, High.user$data)
+
+Moderate.user.df <- 
+  as.data.frame(Moderate.user$`GW-GLM`$SDF) %>%
+  cbind(., Moderate = Moderate.user$`GW User Accuracy`, Moderate.user$data)
+ 
+Low.user.df <- 
+  as.data.frame(Low.user$`GW-GLM`$SDF) %>%
+  cbind(., Low = Low.user$`GW User Accuracy`, Low.user$data)
+```
+```{r results="hide"}
+load("Accuracy.RData")
+## plot function
+ggplot.func <- function(data.i = Outstanding.df, i = 2, palette = "GnBu") {
+  tit = names(data.i)[i]
+  val = data.i[,i]
+  index_Expert <- which(data.i$Expert == 1)
+  index_Nonexpert <- which(data.i$Nonexpert == 1)
+  # tit = paste0(tab, ": ", tit)
+  par(mar = c(0,0,0,0))
+  p <- ggplot() +
+    geom_sf(data = Wales, colour = "grey", fill = "grey") +
+    coord_sf() + 
+    geom_point(data = data.i, aes(x = coords.x1, y = coords.x2, colour = val), size = 0.2) +
+    labs(x = NULL, y = NULL, title = tit, size = 1) +
+    theme(axis.line = element_blank(),
+          axis.text = element_blank(),
+          axis.ticks = element_blank(),
+          legend.position = "bottom",
+          legend.direction = "horizontal",
+          # legend.margin = margin(c(0,0,0,0)),
+          # plot.margin = margin(c(0,0,0,0)),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank()) +
+    scale_colour_distiller(type = "seq",
+                           palette = palette,
+                           name = "Accuracy",
+                           direction = 1,
+                           guide = guide_colourbar(title.position = "top",
+                                                   title.hjust = 0.5,
+                                                   title.vjust = 0.8,
+                                                   barwidth = 10))
+  p
+}
+
+p1 <- ggplot.func(data.i = Outstanding.user.df[,-2], i = 11, palette =  "GnBu")
+p2 <- ggplot.func(data.i =        High.user.df[,-2], i = 11, palette =  "GnBu")
+p3 <- ggplot.func(data.i =    Moderate.user.df[,-2], i = 11, palette =  "GnBu")
+p4 <- ggplot.func(data.i =         Low.user.df[,-2], i = 11, palette =  "GnBu")
+```
+## 4.2 Geographically weighted correspondence matrics
+From the results of Figure \ref{fig:Figure2}, clearly, there is spatial pattern in the estimated accuracies for the outstanding and low classes which may be caused by the distribution of these classes and can display a different degree of spatial smoothness, depending on the bandwidth selection. Herein, a fixed bandwidth of 10 km was determined to produce smoother results, in part, because of the limits of visual perceptions and the fact that the use of a smaller bandwidth (< 10 km) can provide extremely detailed variations of local erros, which is, however, unnecessary for a national study. The spatially distributed measures of accuracy for the middle classes, nonetheless, have scattered and noisy patterns regardless of the kernel size/bandwidth. This is reasonable because the majority of the point observations categorised as the middle classes from both expert and non-expert perspectives were widely distributed across the entire study area. 
+
+The spatial variation in accuracies for the outstanding class indicates the expert-based assessment is relatively poor at matching the public judegements in the north east Wales. A close-up overlaid with the LANDMAP aspect areas (see Figure \ref{fig:Figure3}) reveals that the erroneous estimates of accuracy were mainly caused by several aspect areas, consisting of the mix of lowland valleys and exposed upland/plateau, evaluated as outstanding by the landscape specialists where the majority of observed scenic quality from the crowdsourced dataset tends to be in disagreement. This suggests that more viewpoints or further classification are needed for these areas. In contrast, there are also several areas with a very high degree of accuracy. The coastaline of South West and South Wales are exemplary regions where the Pembrokeshire Coast National Park and the Gower Area of Outstanding Natural Beauty (AONB) are located, suggesting some concensus on the outstanding scenery between experts and non-experts over these areas. 
+
+Meanwhile, the spatially distributed accuracies for each scenic quality class were, then, grouped by the Level 1 of the LANDMAP classification system, comprised of upland, lowland, development and water categories (more detail in [@Weledol2016]). Figure \ref{fig:Figure5} summarises this general tendency for the outstanding classes that the accuracies tend to be left-skewed and the observations in the uplands tend to have lower accuracy than the other three landscape classes. For the low classes, the accuracies in the development are higher than those in the other classes. This might be used to explain the surface for the low class exhibiting a broad trend of increase from the north to the south. The spatial pattern is probably because there are concensus of low scenic quality on predominantly built or developed areas, concentrated mainly in the south, and therefore resulting in the incline. The spatial pattern also indicates two highly erroneous estimates of accuracy in the parts of the North Wales and the Mid Wales. Again, this may be a indication that the topographical effect may make it difficult to descirbe a variety of landscape views within the current classification system. 
+
+```{r eval=T}
+### close-up map
+close_up <- function(roi, data.sf, insetmap) {
+  require(cowplot)
+  LCA <- LCA[roi, ]
+  data.sf <- data.sf[roi, ]
+  ggm1 = insetmap + 
+    geom_sf(data = roi, fill = NA, color = "red", size = 0.5) +
+    theme(legend.position="none",
+          rect=element_rect(colour="black",
+                            fill="white",
+                            size=1))
+  ggm2 = ggplot() + 
+    geom_sf(data = Wales, fill = NA, col = "grey") +
+    #geom_sf(data = LCA[which(LCA$VS_46 == "Outstanding"), ], aes(fill = CLS_2), col = "grey") +
+    geom_sf(data = LCA, aes(fill = CLS_2), col = "grey") +
+    geom_sf(data = data.sf, aes_string(col = names(data.sf)[10]), size = 3) +
+    geom_sf(data = data.sf[which(data.sf$Expert.1 == 1),], shape = 1, size = 3) + 
+    geom_sf(data = data.sf[which(data.sf$Nonexpert == 1), ], shape = 3, size = 3, col = "red") +
+    coord_sf(st_bbox(roi)[c(1,3)], st_bbox(roi)[c(2,4)]) + 
+    scale_colour_distiller(type = "seq", palette = "GnBu", direction = 1, guide = FALSE) +
+    theme(axis.line = element_blank(),
+          axis.text = element_blank(),
+          axis.ticks = element_blank(),
+          legend.position = "bottom",
+          legend.direction = "horizontal",
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank())
+  
+  gg_inset_map = ggdraw() +
+    draw_plot(ggm2, x = 0, y = 0) + 
+    draw_plot(ggm1, x = 0.7, y = 0.05, width = 0.3, height = 0.5)
+
+return(gg_inset_map)
+}
+```
+```{r Figure2, fig.height=8, fig.cap="Surface of accuracy.\\label{fig:Figure2}", out.width='100%'}
+par(mar = c(0,0,0,0))
+fig2 <- lemon::grid_arrange_shared_legend(p1, p2, p3, p4, ncol=2, nrow=2, position='bottom') 
+```
+```{r Figure3, eval=T, fig.height=8, fig.cap="A close-up of the low accuracy for the outstanding class.\\label{fig:Figure3}", out.width='100%'}
+roi = st_bbox(c(xmin = 304500, xmax = 325500,
+                ymin = 324500, ymax = 345500),
+              crs = st_crs(Wales)) %>%
+      st_as_sfc() 
+
+Outstanding.user.df %>%
+  st_as_sf(coords=c("coords.x1","coords.x2"), crs=27700) %>%
+  close_up(roi, ., p1)
+```
+
+```{r eval=F}
+library(rvest)
+library(dplyr)
+roi = st_bbox(c(xmin = 304500, xmax = 325500,
+                ymin = 324500, ymax = 345500),
+              crs = 27700) %>%
+      st_as_sfc() 
+
+Outstanding.user.df %>%
+  st_as_sf(coords=c("coords.x1","coords.x2"), crs = 27700) %>%
+  .[roi, ] %>%
+  .[which(.$Expert.1 == 1), ] %>%
+  # .[which(.$AreaName == "Vale of Llangollen"), ] %>%
+  st_drop_geometry() %>%
+  # select(image_id, URI, variance, Outstanding, LANDMAP, ScenicOrNot, AreaName, CLS_1, CLS_2, CLS_3, CLS_4) ->
+  select(URI) ->
+  url.data.frame
+
+download.Geograph.image <- function(url) {
+  url %>%
+    html_session() %>%
+    html_nodes("img") %>%
+    .[1] %>%
+    html_attr("src") %>%
+    download.file(paste0(gsub("http://www.geograph.org.uk/photo/", "", url), ".jpg"),
+                            mode = "wb")
+}
+apply(url.data.frame, MARGIN = 1, download.Geograph.image)
+```
+
+```{r Figure4, eval=F, fig.height=8, fig.cap="Spatial distribution of the user's accuracy.\\label{fig:Figure4}", out.width='100%'}
+roi = st_bbox(c(xmin = 265500, xmax = 286500,
+                ymin = 314500, ymax = 335500),
+              crs = st_crs(Wales)) %>%
+      st_as_sfc() 
+
+Low.user.df %>%
+  st_as_sf(coords=c("coords.x1","coords.x2"), crs=27700) %>%
+  close_up(roi, ., p4)
+```
+```{r eval=F}
+roi = st_bbox(c(xmin = 265500, xmax = 286500,
+                ymin = 314500, ymax = 335500),
+              crs = st_crs(Wales)) %>%
+      st_as_sfc() 
+
+Low.user.df %>%
+  st_as_sf(coords=c("coords.x1","coords.x2"), crs=27700) %>%
+  .[roi, ] %>%
+  .[which(.$Expert.1 == 1), ] %>%
+  # .[which(.$AreaName == "Vale of Llangollen"), ] %>%
+  st_drop_geometry() %>%
+  # select(image_id, URI, variance, Outstanding, LANDMAP, ScenicOrNot, AreaName, CLS_1, CLS_2, CLS_3, CLS_4) ->
+  select(URI) ->
+  url.data.frame
+apply(url.data.frame, MARGIN = 1, download.Geograph.image)
+```
+
+
+```{r Figure5, fig.height=4, fig.cap="Boxplots of accuracies.\\label{fig:Figure5}", out.width='100%'}
+### Accuracy boxplot
+gg.boxplot <- function(data, class) {
+  data %>%
+  # Outstanding.user.df %>%
+    .[, c(47:50,12)] %>%
+    ggplot(aes_string(x = names(.)[5], y = names(.)[1])) + #, y = reorder(names(.)[1], -class, stats::median))
+    geom_boxploth(varwidth = TRUE, aes(fill = CLS_1)) +
+    xlab(class) +
+    ylab("") +
+    theme_bw(base_size = 14) +
+    theme(axis.title.y=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.y=element_blank()) ->
+    fig
+  return(fig)
+}
+f5a <- gg.boxplot(Low.user.df, "Low")
+f5b <- gg.boxplot(Moderate.user.df, "Moderate")
+f5c <- gg.boxplot(High.user.df, "High")
+f5d <- gg.boxplot(Outstanding.user.df, "Outstanding")
+
+par(mar = c(0,0,0,0))
+fig5<- lemon::grid_arrange_shared_legend(f5a, f5b, f5c, f5d, ncol=2, nrow=2, position='bottom') 
+```
+```{r Figure6, fig.height=4, fig.cap="Boxplots of accuracies.\\label{fig:Figure6}", out.width='100%'}
+Low.user.df[,c(22,12)] %>%
+  left_join(Moderate.user.df[,c(22,12)]) %>%
+  left_join(High.user.df[,c(22,12)]) %>%
+  left_join(Outstanding.user.df[,c(22,12)]) %>%
+  .[,-1] %>%
+  reshape2::melt() %>%
+  ggplot(aes(x=variable, y=value)) +
+  geom_boxplot(aes(fill=variable)) +
+  theme_bw(base_size = 14) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank())
+```
+
+# 5. Discussion
+## 5.1 Implications
+This study demonstrates the geographically weighted analysis is feasible to identify the difference between the formal and informal data sources associated with landscape scenic quality. The results reveal clear spatial patterns in the spatially distributed accuracies among opposite ends of the scenic spectrum (i.e. outstanding and low). In contrast, it turns out that those for the middle classes (i.e. high and moderate) lack of clear clustering. the close-up of the most erronous area suggests these errors taok place in a mixture of valleys and moorland with complex topography, implying the potential overlook of the characterisation approach. Given the landscape characterisation system was based on the assumption that visual quality is a product of the combination of landform and diversity of land use/cover pattern, a variable relationship presumably exists between landform and land patterns. As landform increases in dimension from flatlands through hills to mountains, land pattern decreases in importance as an element of visual quality. And, as landform decreases, the diversity of land pattern becomes increasingly important as an element of visual quality. However, the interrelations among the mixture of diverse landforms are overlooked and neglected. In addition, many misclassifications were observed in the middle classes and evenly distributed thoughout the study area, leading to the lack of clear spatial patterns. This is one of the limitations of the analysis because less consensus in these classes; however, there is little understanding about what experts and nonexperts report as being high or moderate scenic quality. Further research on considering the textual information of both data sources might contribute to a more nuanced understanding of how landscapes were conceptualised differently.
+
+## 5.2 Limitations
+The critical issues in the use of crowdsourced spatial data are centred around data quality where the reliability remains problematic. First, the Geograph project adopts a consensus-based quality control, often known as a Linus Law, on the user-contributed information regarding locations and images, operated by a number of voluntary moderators. However, there is no quarantee of the positional accuracy for every image, which is subject to the local expertise of both contributors and moderators. This inherent uncertainty in the spatial dimension is particularly indicated by the grid reference precision. Second, although the Scenic-Or-Not campaign is similar to a photo-based assessment of landscape aesthetics [@Daniel2001], the mechanism of eliciting landscape perceptions of scenic beauty is too simplistic to assert the reliability. It would be more accurate to consult people who actually experience landscapes and articulate their appreciation rather than the way they perceive landscape from static images. Furthermore, nothing is known about the rationale behind the single image selection for each 1 km grid square while there are many Geograph images available per square. Given the use of photographs as a proxy for the landscape, the ratings are more likely bounded by the biases of image selection. Moreover, participants are not required to register, therefore it is impossible to know whose opinions. These anonymous contributions may only be represnetative of a small group of people rather than the gerneral public (reference needed). It is important to acknowledge that this crowdsourced spatial data on scenicness deemed ground truth or reference data may be wrong. At the same time, several points regarding the analyses also need to be discussed. The crowdsourced scenic scores on a 1-10 range were categorised into four equal intervals. There are many other refinements that can be made to retain the degree of continuum. For example, the quantitative scenicness can be expressed through fuzzy membership measurement rather than a crisp membership. Lastly, this study leant toward a similar logic of a landscape classification, in that the underlying assumption is that lanscape aesthetic quality can be determined by the relevant features or subjects of landscapes. This is a fairly easy way of annotating perceptual values to landscapes. It does overlook, however, the dependence on the viewer's or photographer's contexts (e.g. viewpoints, view directions and distance zone).
+
+## 5.3 Future work
+The last point underline the need for rethinking a classification system which is close to the sense of visual perception if this is regarded as important. Although the hierarchical classification system provides a bird-eye perspective, widely used as a frame of reference for communication in planning processes [@Fagerholm2013], this is far from people's on-the-ground perceptions and experiences of landscapes. As such, more emphasis needs to be given over to characterisation on the human scale. Similar attempts suggest opportunities for characterising the landscape experience by accommodating the temproal visibility [@Brabyn2015] or the vertical aspect of visibility [@Carver2012]. These can be used to more accurately establish the relationship between landscape characteristics and preference information, proliferated by the emerging campaign.
+
+# 6. Conclusion
+This study illustrates how a geographically weighted approach can be used to reveal the general trend across space enhancing the process of characterising landscapes, that are not imediately apparent. The findings also demonstrate opportunities for operationally identify the difference  by incorporate the volunteered geographic information from a crowdsourcing campaign into the formal paradigm of landscape assessment. The local statistic of accuracies can be mapped to identify where the general public's opinions on landscape aesthetics contrast with expert's perspectives for enhancing the characterisation process of landscape assessment. Such generic approach can also be applied to other research, attmpting to measure volunteered geographic information against authoritative data.  
+

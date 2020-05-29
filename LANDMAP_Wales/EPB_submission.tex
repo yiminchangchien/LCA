@@ -1,0 +1,371 @@
+\documentclass[]{elsarticle} %review=doublespace preprint=single 5p=2 column
+%%% Begin My package additions %%%%%%%%%%%%%%%%%%%
+\usepackage[hyphens]{url}
+
+  \journal{Landscape and Urban Planning} % Sets Journal name
+
+
+\usepackage{lineno} % add
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\usepackage{graphicx}
+\usepackage{booktabs} % book-quality tables
+%%%%%%%%%%%%%%%% end my additions to header
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \usepackage{fontspec}
+  \ifxetex
+    \usepackage{xltxtra,xunicode}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\bibliographystyle{elsarticle-harv}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={An hybrid approach of identifying outstanding scenic beauty areas by machine learning andscape designation},
+            colorlinks=false,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+
+\setcounter{secnumdepth}{0}
+% Pandoc toggle for numbering sections (defaults to be off)
+\setcounter{secnumdepth}{0}
+
+
+% Pandoc header
+
+
+
+\begin{document}
+\begin{frontmatter}
+
+  \title{An hybrid approach of identifying outstanding scenic beauty areas by
+machine learning andscape designation}
+    \author[School of Geography, University of Leeds]{Yi-Min Chang Chien\corref{1}}
+   \ead{gyymcc@leeds.ac.uk} 
+    \author[School of Geography, University of Leeds]{Alexis Comber}
+   \ead{bob@example.com} 
+    \author[School of Geography, University of Leeds]{Steve Carber\corref{2}}
+   \ead{cat@example.com} 
+      \address[Some Institute of Technology]{Department, Street, City, State, Zip}
+    \address[Another University]{Department, Street, City, State, Zip}
+      \cortext[1]{Corresponding Author}
+    \cortext[2]{Equal contribution}
+  
+  \begin{abstract}
+  This paper describes the potential of refining the process of landscape
+  characterisation by incorporating the crowdsourced perceptions of scenic
+  beauty into the widely adopted Landscape Character Assessment (LCA)
+  approach in the UK. This study demonstrate the locally sensitive method
+  widely used in the remote sensing studies for identifying the low
+  concensus areas of scenic beauty between expert and non-expert
+  perspectives within Wales.
+  \end{abstract}
+  
+ \end{frontmatter}
+
+\emph{Text based on elsarticle sample manuscript, see
+\url{http://www.elsevier.com/author-schemas/latex-instructions\#elsarticle}}
+
+\hypertarget{the-elsevier-article-class}{%
+\section{The Elsevier article class}\label{the-elsevier-article-class}}
+
+\hypertarget{introduction}{%
+\paragraph{Introduction}\label{introduction}}
+
+Landscape value is derived from human perception which is influenced by
+personal feelings and opinions, it cannot be objective. Additionally,
+when it comes to planning (e.g.~landscape designation), expert judgement
+seems superior than public judgement. The single use of experts in
+assessment methods can be practical while the resource is constrained.
+characterisation of landscape using two dimensional information is
+highly contested, therefore ignoring the importance of the general
+public opinions. Expert judgement seems superior than public judgement.
+--\textgreater{} how to measure whether there is consensus about the
+value of a landscape or not
+
+use visual and sensory aspect area as a framework for field survey
+
+One of the practicality of the existing framework is the widely adopted
+Landscape Character Assessment (LCA), which is based on two phases of
+process: characterisation and evaluation. Firstly, landscape is
+classified into homogenous categories in accordance with physical
+character such as geology, landform, land cover. Secondly, However,
+characterisation of landscape is a matter of interpretation and
+perception and this task is typically reserved for professionals,
+making--\textgreater{} designating criteria --\textgreater{} a few
+expert judgement --\textgreater{} to some extent, landscape designation
+is based on character --\textgreater{} Landscape Character Assessment
+(descriptive v.s. evaluative) --\textgreater{} evaluative consideration
+(i.e.~how is the evaluative components under current character system?)
+
+Neogeography Scenic-Or-Not
+
+Views of stakeholders and the public can be strong indicators as to
+whether there is consensus about the value of a landscape
+
+\begin{itemize}
+\item
+  Those involved in landscape planning were sometimes reluctant to
+  tackle the visual and perceptual aspects of landscape, as opposed to
+  the specific and often more easily dealt with aspects of land use and
+  management, such as agriculture, forestry, recreation and nature
+  conservation.
+\item
+  Scenic-Or-Not provides an invaluable data source which can be
+  manipulated and interro- gated in many different ways and linked to
+  other data sets.
+\item
+  In order to make these judgements (some of which are subjective) in a
+  transparent and consistent way, this Guidance sets out which criteria
+  Natural England intends to use.
+\item
+  It is certain in the Guidance for AONB designation that judgement has
+  to be made in order to value the landscape;
+\item
+  No information is provided on how to involve stakeholders and how to
+  measure whether there is consensus about the value of the landscape or
+  not;
+\item
+  The single use of experts in assessment methods is highly contested in
+  landscape preference research;
+\item
+  The practicality of the existing framework is questionable.
+\item
+  Nevertheless, questions need to be raised here. First of all, who is
+  describing value to the landscape? Is the designation based on public
+  judgment, or on expert judgement? This is not being stressed in the
+  document, only it states that: `where there is a consensus of opinion
+  that an area meets the statutory criteria or should be designated,
+  this helps determining whether it is accorded a special value that
+  should be recognized. Views of stakeholders and the public can be
+  strong indicators as to whether there is consensus about the value of
+  a landscape'. Unfortunately, no information is provided on how to
+  involve stakeholders and how to measure whether there is consensus
+  about the value of the landscape or not.
+\item
+  Characterisation of landscape is a matter of interpretation and
+  perception;
+\item
+  the landscapes are classified on classified of low, moderate, high or
+  outstanding quality. \# qualitative to quantitative evaluation The
+  current practice of LCA is based on qualitative descriptions. The
+  evaluation is carried out by specialists and recorded in a qualitative
+  manner where the evaluative components under current character system
+  includes wildness/integrity/ The relationship between wildness and
+  scenicness was evidence by our previous attempt (forthcoming). Thus,
+  it might be worth to look at whether the qualitative measure of
+  wildness quality can be enhanced the qualitative evaluation of scenic
+  quality. the sources involved are not quantitative: they are texts
+  containing qualitative descriptions and, as such, need to be analysed
+  using a mix of approaches that combine spatial analysis with close
+  reading.
+\item
+  Some of the criteria used to value the landscape are also used as
+  landscape character indica-tors for perceptual aspects such as
+  tranquillity and wildness.  However, it is not stated how to use
+  these criteria in practice or what to do with these indicators in the
+  first place. It is merely mentioned that they can be used to identify
+  valued landscapes that merit some form of designa-tion or recognition.
+   Yet, in what way are the stakeholders involved? How can we derive
+  the value that stakeholders assign to the landscape from these
+  criteria? This does not seem to be explained in the LCA document. \#
+  sentence
+\item
+  the point on the east bank of Windermere, for instance, gives little
+  indication of precisely to where on this large body of water the text
+  is referring
+\item
+  1:100,000, National land use policy: deciding which areas to protect
+\item
+  1: 25,000, Monitoring regional land use Local management: Managing
+  sensitive areas
+\item
+  lt must be possible for decision-making bodies to update the
+  information on their areas easily and quickly.
+\item
+  budgetary constraints and time limits.
+\item
+  The maps can be fairly easily updated on a regular basis.
+\item
+  The results of certain statistical surveys (areolar surveys of land
+  use/cover) might suggest that the problem of the unit area is not
+  really problematical. However, it must be remembered that these
+  surveys sample points, not surfaces. Nonetheless, in the field it is
+  still possible to classify a point as an item in a land cover
+  nomenclature
+\item
+  it must provide an acceptable representation of reality.
+\item
+\item
+\item
+  (Seresinhe et al., \protect\hyperlink{ref-Seresinhe2019}{2019})
+  \#\#\#\# 3. Materials and methods The process of landscape
+  characterisation in the UK is primarily based on two-dimensional maps.
+  The scenic quality is evaluated by professionals through site survey.
+\end{itemize}
+
+LANDMAP is Welsh national landscape landscapes --\textgreater{} The
+planning authorities intend to use LANDMAP to inform decision making.
+\#\#\# 3.1. Welsh LANDMAP Data LANDMAP is
+
+The expert-based landscape qualities LANDMAP is an all-Wales landscape
+resource where landscape characteristics, qualities and influences on
+the landscape are recorded and evaluated in a nationally consistent data
+set.
+
+Characterisation sub-divides the landscape into areas based on the
+visual continuity of physical characteristics such as geology, landform
+and land cover applied through the lens of spatial hierarchical mapping.
+
+The Visual \& Sensory aspect is organised according to a hierarchical
+classification system. This typology aims to classify the landscape into
+areas of distinct Visual \& Sensory character, and is based on a
+hierarchy of four levels.
+
+five aspects of landscape
+classification/characteristics/characterisations --- geology, habitats,
+sensory (primarily visually), historic and cultural characters. These
+are evaluated and recorded as spatial data.
+
+\begin{itemize}
+\tightlist
+\item
+  geological landscape (classification)
+\item
+  landscape habitats (classification
+\item
+  visual \& sensory (classification): maps landscape characteristics and
+  qualities as perceived through our senses, primarily visually.
+  --\textgreater{} The physical attributes of landform and land cover,
+  their visible patterns and their interrelationship. --\textgreater{}
+  Examples of information recorded includes: Landscape elements and
+  features, aesthetic presence of water and seasonality, important
+  qualities, boundary type, scale, enclosure, diversity, colour, sense
+  of place, night time light, building materials, views, scenic quality,
+  rarity, integrity and character. • built land • coastal • coastal
+  waters • developed unbuilt land • exposed upland/plateau • flat
+  lowland/levels • hills, lower plateau \& scarp slopes • inland water
+  (including associated edge) • lowland valleys • rolling lowland •
+  upland valleys
+\item
+  historic landscape
+\item
+  LANDMAP is managed as a spatial dataset • Spatial data consists of
+  observations (surveys in LANDMAP) with locations (mapped geographic
+  areas) • Geographical Information System (GIS) software records and
+  displays this spatial data
+\end{itemize}
+
+Maps and classifies landscapes -- Describes their characteristics,
+qualities and components
+
+The Welsh landscape baseline LANDMAP data : Visual and Sensory aspect
+
+\hypertarget{scenic-or-not-data}{%
+\paragraph{3.2. Scenic-Or-Not data}\label{scenic-or-not-data}}
+
+is on 1-10 scores. The crowdsourced scenic ratings were reclassified
+into one of scenic quality classes to correspond to the LANDMAP dataset.
+
+\hypertarget{analysis}{%
+\subsection{Analysis}\label{analysis}}
+
+\hypertarget{oridnal-regression-model}{%
+\paragraph{Oridnal Regression Model}\label{oridnal-regression-model}}
+
+Once the package is properly installed, you can use the document class
+\emph{elsarticle} to create a manuscript. Please make sure that your
+manuscript follows the guidelines in the Guide for Authors of the
+relevant journal. It is not necessary to typeset your manuscript in
+exactly the same way as an article, unless you are submitting to a
+camera-ready copy (CRC) journal.
+
+\hypertarget{analysis-1}{%
+\paragraph{Analysis}\label{analysis-1}}
+
+apply the model to a case study area and suggest a character area by
+grouping adjacent pixels with the same class. I suppose this would have
+to be on a 1km grid for the Scenicness data
+
+\begin{itemize}
+\item
+  document style
+\item
+  baselineskip
+\item
+  front matter
+\item
+  keywords and MSC codes
+\item
+  theorems, definitions and proofs
+\item
+  lables of enumerations
+\item
+  citation style and labeling.
+\end{itemize}
+
+\hypertarget{front-matter}{%
+\section{Front matter}\label{front-matter}}
+
+The author names and affiliations could be formatted in two ways:
+
+\begin{enumerate}
+\def\labelenumi{(\arabic{enumi})}
+\item
+  Group the authors per affiliation.
+\item
+  Use footnotes to indicate the affiliations.
+\end{enumerate}
+
+See the front matter of this document for examples. You are recommended
+to conform your choice to the journal you are submitting to.
+
+\hypertarget{bibliography-styles}{%
+\section{Bibliography styles}\label{bibliography-styles}}
+
+There are various bibliography styles available. You can select the
+style of your choice in the preamble of this document. These styles are
+Elsevier styles based on standard styles like Harvard and Vancouver.
+Please use BibTeX~to generate your bibliography and include DOIs
+whenever available.
+
+Here are two sample references: ({\textbf{???}}; {\textbf{???}}).
+
+\hypertarget{references}{%
+\section*{References}\label{references}}
+\addcontentsline{toc}{section}{References}
+
+\hypertarget{refs}{}
+\leavevmode\hypertarget{ref-Seresinhe2019}{}%
+Seresinhe, C.I., Preis, T., MacKerron, G., Moat, H.S., 2019. Happiness
+is Greater in More Scenic Locations. Scientific Reports 9, 4498.
+doi:\href{https://doi.org/10.1038/s41598-019-40854-6}{10.1038/s41598-019-40854-6}
+
+
+\end{document}
+
+
